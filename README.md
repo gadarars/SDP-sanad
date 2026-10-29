@@ -59,26 +59,9 @@ Views never talk to the database directly.
   mix association, aggregation, inheritance and realization.
 - No Phase 2 patterns yet (Command, Adapter, Facade, Template Method, Iterator, State, Proxy).
 
-## Who does what
+## Phase 1 work
 
-| Member | Module | Graded items |
-|---|---|---|
-| A | Users: login and User Control Panel (full CRUD for every user type) | Singleton 0.5 (done), Factory 0.5, User Control Panel 1 |
-| B | Donations: CRUD and donor history | Strategy 1, Decorator 1 |
-| C | Events and volunteers: registration, attendance, assignment, hours, certificates | Observer 1 |
-| D | Beneficiaries, notifications, lookup tables, documents | CRUD lookup tables 0.5 |
-| All | Their own module's MVC, class diagram part and 2-3 client requirements | MVC 2, Class diagram 2, Client requirements 0.5 |
-
-## Pattern plans
-
-| Pattern | Owner | Classes |
-|---|---|---|
-| Singleton | A | `db/DatabaseConnection`: one shared connection, reopened if MySQL drops it |
-| Factory | A | `UserFactory.create(role, ...)` returns a `Donor`, `Volunteer`, `Beneficiary` or `Admin` |
-| Strategy | B | `DonationMethod` interface, implemented by `OnlineDonation`, `CheckDonation`, `InKindDonation`. `Donation` holds one, swaps it with `setDonationMethod(...)` and calls it from `performPayment()` |
-| Decorator | B | Abstract `DonationPackage` (`getDescription()`, `getAmount()`). Base packages `OneTimeDonation`, `MonthlySponsorship`. Abstract `DonationAddOnDecorator` with `CoverFeesDecorator`, `GiftAidDecorator`, `MatchingGiftDecorator` |
-| Observer | C | Own `Subject` (`registerObserver`, `removeObserver`, `notifyObservers`) and `Observer` (`update`) interfaces. `Event` is the subject; attendees and volunteers observe it |
-| Notifications | D | `NotificationSender` with `EmailSender` and `SmsSender`, which save to a `notifications` table shown in a Notifications tab |
+Phase 1 tasks are tracked in the repo's [GitHub issues](https://github.com/gadarars/SDP-sanad/issues).
 
 ## Submission checklist
 
