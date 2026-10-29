@@ -49,14 +49,6 @@ and a tab in `view/MainView.java`.
 
 Do NOT use Phase 2 patterns yet (Command, Adapter, Facade, Template Method, Iterator, State, Proxy).
 
-## 5. Team split (change names if you agree otherwise)
-| Member | Owns |
-|---|---|
-| A - Roaa | Users + Lookup tables, class diagram merge, SRS merge, final packaging |
-| B - Yousif (leader) | Donations module + Factory, repo/branch management |
-| C - Philopater | Volunteers + Events modules + Observer |
-| D - Adham | Beneficiaries + Communication (Strategy + Decorator) |
-
 ## 6. Client requirements (examples - pick and finish these)
 Think like a real client using the system:
 - Staff records a donation and a receipt is produced (Factory + Decorator).
