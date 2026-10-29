@@ -58,20 +58,7 @@ Think like a real client using the system:
 - Admin manages users and their roles.
 Write the final list in the SRS and test each one end to end.
 
-## 7. Pattern cheat sheet (one line each)
-- Factory: one method returns the right object from a type, `DonationFactory.create("online")`.
-- Strategy: an interface with several swappable implementations, `NotificationStrategy` -> `EmailStrategy`, `SmsStrategy`.
-- Decorator: a wrapper with the same interface that adds behaviour, `LoggingDecorator(new EmailNotification())`.
-- Observer: a subject keeps a list of observers and calls `update()` on each when it changes.
-- Singleton: private constructor + `getInstance()` (see `DatabaseConnection`).
-Mark each pattern class with a comment such as `/** STRATEGY PATTERN */` so the grader can find it.
 
-## 8. Git rules
-- Never work directly on `main`. Make your own branch: `git checkout -b feature/<your-feature>`.
-- Commit small and often with clear messages, push your branch, then open a Pull Request into `main`.
-- Before you start each day: `git checkout main` then `git pull`.
-- Do not commit `target/` or `sanad.db` (the `.gitignore` already prevents that - do not delete `.gitignore`).
-- Only merge to `main` when `mvn javafx:run` works.
 
 ## 9. Final submission checklist
 1. SRS (Word or PDF) with all team members' names.
