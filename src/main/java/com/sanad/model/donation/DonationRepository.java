@@ -8,14 +8,10 @@ import java.util.List;
 /** MODEL: database access (full CRUD) for donations. */
 public class DonationRepository {
 
-    private Connection conn() {
-        return DatabaseConnection.getInstance().getConnection();   // Singleton
-    }
-
     // CREATE
     public void add(Donation x) {
         String sql = "INSERT INTO donations(donor_name, amount, type) VALUES(?, ?, ?)";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement(sql)) {
             ps.setString(1, x.getDonorName());
             ps.setDouble(2, x.getAmount());
             ps.setString(3, x.getType());
@@ -26,7 +22,7 @@ public class DonationRepository {
     // READ
     public List<Donation> findAll() {
         List<Donation> list = new ArrayList<>();
-        try (Statement st = conn().createStatement();
+        try (Statement st = DatabaseConnection.getInstance().getConnection().createStatement();
              ResultSet rs = st.executeQuery("SELECT * FROM donations")) {
             while (rs.next()) {
                 list.add(new Donation(rs.getInt("id"), rs.getString("donor_name"), rs.getDouble("amount"), rs.getString("type")));
@@ -38,7 +34,7 @@ public class DonationRepository {
     // UPDATE
     public void update(Donation x) {
         String sql = "UPDATE donations SET donor_name=?, amount=?, type=? WHERE id=?";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement(sql)) {
             ps.setString(1, x.getDonorName());
             ps.setDouble(2, x.getAmount());
             ps.setString(3, x.getType());
@@ -49,7 +45,7 @@ public class DonationRepository {
 
     // DELETE
     public void delete(int id) {
-        try (PreparedStatement ps = conn().prepareStatement("DELETE FROM donations WHERE id=?")) {
+        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement("DELETE FROM donations WHERE id=?")) {
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (SQLException e) { throw new RuntimeException(e); }

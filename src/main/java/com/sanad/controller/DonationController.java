@@ -12,21 +12,19 @@ public class DonationController {
     public List<Donation> getAll() { return repo.findAll(); }
 
     public void add(String donorName, double amount, String type) {
-        validate(donorName);
-        if (amount <= 0) throw new IllegalArgumentException("Amount must be positive");
+        check(donorName, amount);
         repo.add(new Donation(0, donorName, amount, type));
     }
 
     public void update(int id, String donorName, double amount, String type) {
-        validate(donorName);
-        if (amount <= 0) throw new IllegalArgumentException("Amount must be positive");
+        check(donorName, amount);
         repo.update(new Donation(id, donorName, amount, type));
     }
 
     public void delete(int id) { repo.delete(id); }
 
-    private void validate(String required) {
-        if (required == null || required.isBlank())
-            throw new IllegalArgumentException("Donor name is required");
+    private void check(String donorName, double amount) {
+        if (donorName == null || donorName.isBlank()) throw new IllegalArgumentException("Donor name is required");
+        if (amount <= 0) throw new IllegalArgumentException("Amount must be positive");
     }
 }

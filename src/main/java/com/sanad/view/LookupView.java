@@ -5,7 +5,6 @@ import com.sanad.model.lookup.Lookup;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 
 /** VIEW: builds the Lookup tables screen. It only talks to the controller, never to the database. */
@@ -22,17 +21,16 @@ public class LookupView extends VBox {
         setPadding(new Insets(12));
         setSpacing(10);
 
-        table.getColumns().add(col("ID", "id"));
-        table.getColumns().add(col("Kind (e.g. DONATION_TYPE)", "kind"));
-        table.getColumns().add(col("Value", "name"));
+        table.getColumns().addAll(ViewUtil.<Lookup>col("ID", "id"), ViewUtil.<Lookup>col("Kind (e.g. DONATION_TYPE)", "kind"),
+                ViewUtil.<Lookup>col("Value", "name"));
         kindField.setPromptText("Kind (e.g. DONATION_TYPE)");
         nameField.setPromptText("Value");
 
         // clicking a row fills the form so you can edit it
         table.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
             if (sel != null) {
-                kindField.setText(String.valueOf(sel.getKind()));
-                nameField.setText(String.valueOf(sel.getName()));
+                kindField.setText(sel.getKind());
+                nameField.setText(sel.getName());
             }
         });
 
@@ -72,11 +70,5 @@ public class LookupView extends VBox {
 
     private void refresh() {
         table.setItems(FXCollections.observableArrayList(controller.getAll()));
-    }
-
-    private static <T> TableColumn<Lookup, T> col(String title, String property) {
-        TableColumn<Lookup, T> c = new TableColumn<>(title);
-        c.setCellValueFactory(new PropertyValueFactory<>(property));
-        return c;
     }
 }

@@ -8,11 +8,9 @@ import java.util.List;
 /** MODEL: database access (CRUD) for events. */
 public class EventRepository {
 
-    private Connection conn() { return DatabaseConnection.getInstance().getConnection(); }
-
     public void add(Event e) {
         String sql = "INSERT INTO events(name, date, location, category) VALUES(?,?,?,?)";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement(sql)) {
             ps.setString(1, e.getName()); ps.setString(2, e.getDate());
             ps.setString(3, e.getLocation()); ps.setString(4, e.getCategory());
             ps.executeUpdate();
@@ -21,7 +19,7 @@ public class EventRepository {
 
     public List<Event> findAll() {
         List<Event> list = new ArrayList<>();
-        try (Statement st = conn().createStatement();
+        try (Statement st = DatabaseConnection.getInstance().getConnection().createStatement();
              ResultSet rs = st.executeQuery("SELECT * FROM events")) {
             while (rs.next()) {
                 list.add(new Event(rs.getInt("id"), rs.getString("name"),
@@ -33,7 +31,7 @@ public class EventRepository {
 
     public void update(Event e) {
         String sql = "UPDATE events SET name=?, date=?, location=?, category=? WHERE id=?";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement(sql)) {
             ps.setString(1, e.getName()); ps.setString(2, e.getDate());
             ps.setString(3, e.getLocation()); ps.setString(4, e.getCategory());
             ps.setInt(5, e.getId());
@@ -42,7 +40,7 @@ public class EventRepository {
     }
 
     public void delete(int id) {
-        try (PreparedStatement ps = conn().prepareStatement("DELETE FROM events WHERE id=?")) {
+        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement("DELETE FROM events WHERE id=?")) {
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (SQLException ex) { throw new RuntimeException(ex); }

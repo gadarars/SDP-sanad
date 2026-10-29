@@ -12,19 +12,18 @@ public class LookupController {
     public List<Lookup> getAll() { return repo.findAll(); }
 
     public void add(String kind, String name) {
-        validate(kind);
+        check(kind);
         repo.add(new Lookup(0, kind, name));
     }
 
     public void update(int id, String kind, String name) {
-        validate(kind);
+        check(kind);
         repo.update(new Lookup(id, kind, name));
     }
 
     public void delete(int id) { repo.delete(id); }
 
-    private void validate(String required) {
-        if (required == null || required.isBlank())
-            throw new IllegalArgumentException("Kind (e.g. DONATION_TYPE) is required");
+    private void check(String kind) {
+        if (kind == null || kind.isBlank()) throw new IllegalArgumentException("Kind (e.g. DONATION_TYPE) is required");
     }
 }

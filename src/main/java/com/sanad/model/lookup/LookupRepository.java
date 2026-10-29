@@ -8,14 +8,10 @@ import java.util.List;
 /** MODEL: database access (full CRUD) for lookups. */
 public class LookupRepository {
 
-    private Connection conn() {
-        return DatabaseConnection.getInstance().getConnection();   // Singleton
-    }
-
     // CREATE
     public void add(Lookup x) {
         String sql = "INSERT INTO lookups(kind, name) VALUES(?, ?)";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement(sql)) {
             ps.setString(1, x.getKind());
             ps.setString(2, x.getName());
             ps.executeUpdate();
@@ -25,7 +21,7 @@ public class LookupRepository {
     // READ
     public List<Lookup> findAll() {
         List<Lookup> list = new ArrayList<>();
-        try (Statement st = conn().createStatement();
+        try (Statement st = DatabaseConnection.getInstance().getConnection().createStatement();
              ResultSet rs = st.executeQuery("SELECT * FROM lookups")) {
             while (rs.next()) {
                 list.add(new Lookup(rs.getInt("id"), rs.getString("kind"), rs.getString("name")));
@@ -37,7 +33,7 @@ public class LookupRepository {
     // UPDATE
     public void update(Lookup x) {
         String sql = "UPDATE lookups SET kind=?, name=? WHERE id=?";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement(sql)) {
             ps.setString(1, x.getKind());
             ps.setString(2, x.getName());
             ps.setInt(3, x.getId());
@@ -47,7 +43,7 @@ public class LookupRepository {
 
     // DELETE
     public void delete(int id) {
-        try (PreparedStatement ps = conn().prepareStatement("DELETE FROM lookups WHERE id=?")) {
+        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement("DELETE FROM lookups WHERE id=?")) {
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (SQLException e) { throw new RuntimeException(e); }

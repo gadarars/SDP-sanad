@@ -5,7 +5,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-/** Entry point. Run with:  mvn javafx:run */
+/** Entry point. Run with:  ./mvnw javafx:run */
 public class App extends Application {
 
     @Override
