@@ -1,23 +1,27 @@
 # Sanad - Non-Profit Management System (CSE336, Phase 1)
 
-Java + JavaFX + SQLite, built with Maven. Team T08 "Sanad".
+Java 17 + JavaFX 21 + MySQL 9.7, built with Maven. Team T08 "Sanad".
 One system for: donations, volunteers, events, beneficiaries, communication.
 
 ## 1. Run it
-Needs JDK 17+ and Maven (JavaFX and SQLite download automatically through Maven).
+Needs JDK 17+ and Docker Desktop. Maven is not needed: use the wrapper (`mvnw`).
 
-    mvn javafx:run
+    docker compose up -d        # starts MySQL 9.7 (first time downloads the image)
+    ./mvnw javafx:run           # Windows CMD / PowerShell: mvnw.cmd javafx:run
 
 A window opens with tabs: Donations, Volunteers, Events, Beneficiaries, Users, Lookup tables.
-The database file `sanad.db` is created automatically on first run (it is NOT committed to git).
+The tables are created automatically on first run. Data lives in the Docker volume `mysql-data`,
+so it survives restarts. `docker compose down -v` wipes it.
+
+Not using Docker? Install MySQL 9.7, create a database `sanad`, and put your own
+URL / user / password in `src/main/resources/db.properties`.
 
 ## 2. How the code is organised (MVC)
     com.sanad
     |- App.java            starts the program
-    |- db/                 DatabaseConnection  (Singleton - one shared connection)
+    |- db/                 DatabaseConnection (Singleton)
     |- model/              data + SQL, one package per module
-    |   |- donation/ volunteer/ event/ beneficiary/ user/ lookup/
-    |   |- notification/   (empty - Strategy + Decorator go here)
+    |   |- donation/ volunteer/ event/ beneficiary/ user/ lookup/ notification/
     |- view/               JavaFX screens. NEVER touch the database from a view.
     |- controller/         one controller per module: validates input, calls the model
 
@@ -26,41 +30,36 @@ To add a new module, copy the Volunteer files (Volunteer, VolunteerRepository,
 VolunteerController, VolunteerView), rename, add a table in `db/DatabaseConnection.java`
 and a tab in `view/MainView.java`.
 
-## 3. What is already done
-| Item | Status |
-|---|---|
-| Singleton (DB connection) | DONE - `db/DatabaseConnection` |
-| MVC | DONE for Donations, Volunteers, Events, Beneficiaries, Users, Lookups |
-| Basic CRUD screens | DONE for all 6 (add / update / delete / list) |
+## 3. Rules (from the lectures)
+- Follow the lecture code for each pattern: same class shapes and method names.
+- No `System.out` in model, controller or pattern classes. Only views show output.
+- Class diagram: no empty or stand-alone classes, no "System" god class, use interfaces where possible,
+  mix association / aggregation / inheritance / realization.
+- Do NOT use Phase 2 patterns yet (Command, Adapter, Facade, Template Method, Iterator, State, Proxy).
 
-## 4. What is left (Phase 1 = 10 marks)
-| Item | Marks | Owner | Where |
-|---|---|---|---|
-| Factory | 0.5 | Member B | `model/donation/` - DonationFactory creates Online/Check/InKind donation by type |
-| Observer | 1 | Member C | `model/donation/` + `model/event/` - when a donation/event changes, observers are notified |
-| Strategy | 1 | Member D | `model/notification/` - NotificationStrategy: Email / SMS / Social |
-| Decorator | 1 | Member D | `model/notification/` - e.g. LoggingDecorator, ReceiptDecorator wrapping a notification |
-| User control panel | 1 | Member A | `Users` tab: improve (roles, validation); full CRUD already works |
-| CRUD lookup tables | 0.5 | Member A | `Lookup tables` tab: seed donation types, event categories, skills; use them in the combo boxes |
-| Client requirements | 0.5 | everyone | pick real flows (see section 6), make sure they work |
-| Class diagram | 2 | Member A (merge) + all | `docs/` - all main classes + the Phase 1 patterns ONLY |
-| SRS document | - | all, A merges | `docs/` - each member writes the section for their module |
-| Grading sheet, zip, repo link | - | Member A | final step |
+## 4. Who does what (Phase 1 = 10 marks)
+| Member | Module | Patterns |
+|---|---|---|
+| A | Architecture + Users: Singleton, `UserFactory`, User Control Panel (login + full CRUD for every user type) | Singleton (0.5, done), Factory (0.5) |
+| B | Donations: CRUD, donor history | Strategy (1), Decorator (1) |
+| C | Events + Volunteers: registration, attendance, assignment, hours, certificate | Observer (1) |
+| D | Beneficiaries, notifications, lookup tables, documents | CRUD lookup tables (0.5) |
+| All | Own module's MVC, class diagram part, 2-3 client requirements | MVC (2), Class diagram (2), Client req. (0.5) |
 
-Do NOT use Phase 2 patterns yet (Command, Adapter, Facade, Template Method, Iterator, State, Proxy).
+Pattern plans:
+- **Singleton** (A): `db/DatabaseConnection` - one shared connection, reopened if MySQL drops it.
+- **Factory** (A): `UserFactory.create(role, ...)` returns `Donor`, `Volunteer`, `Beneficiary` or `Admin`.
+- **Strategy** (B): `DonationMethod` interface with `OnlineDonation`, `CheckDonation`, `InKindDonation`.
+  `Donation` holds a `DonationMethod`, has `setDonationMethod(...)` and `performPayment()` delegates to it.
+- **Decorator** (B): abstract `DonationPackage` (`getDescription()`, `getAmount()`), base packages
+  `OneTimeDonation` / `MonthlySponsorship`, abstract `DonationAddOnDecorator`, add-ons
+  `CoverFeesDecorator`, `GiftAidDecorator`, `MatchingGiftDecorator`.
+- **Observer** (C): own `Subject` (`registerObserver`, `removeObserver`, `notifyObservers`) and
+  `Observer` (`update`) interfaces. `Event` is the subject; attendees and volunteers observe it.
+- **Notifications** (D): `NotificationSender` with `EmailSender` / `SmsSender` that save to a
+  `notifications` table, shown in a Notifications tab.
 
-## 6. Client requirements (examples - pick and finish these)
-Think like a real client using the system:
-- Staff records a donation and a receipt is produced (Factory + Decorator).
-- Staff registers a volunteer, logs hours, assigns them to an event.
-- Staff creates an event; registered volunteers are notified when it changes (Observer + Strategy).
-- Staff records a beneficiary and what was delivered to them.
-- Admin manages users and their roles.
-Write the final list in the SRS and test each one end to end.
-
-
-
-## 9. Final submission checklist
+## 5. Final submission checklist
 1. SRS (Word or PDF) with all team members' names.
 2. Code zip (without `target/`).
 3. GitHub repo link in a text file.
