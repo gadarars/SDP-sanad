@@ -4,10 +4,6 @@ package com.sanad.model.lookup;
  * MODEL: data object for one lookup.
  */
 public class Lookup {
-    public static final String EVENT_CATEGORY = "EVENT_CATEGORY";
-    public static final String NEED_TYPE = "NEED_TYPE";
-    public static final String VOLUNTEER_SKILL = "VOLUNTEER_SKILL";
-
     private final int id;
     private String kind;
     private String name;

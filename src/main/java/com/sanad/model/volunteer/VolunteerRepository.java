@@ -1,48 +1,24 @@
 package com.sanad.model.volunteer;
 
-import com.sanad.db.DatabaseConnection;
-import java.sql.*;
-import java.util.ArrayList;
+import org.jdbi.v3.sqlobject.config.RegisterConstructorMapper;
+import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.statement.SqlQuery;
+import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import java.util.List;
 
 /** MODEL: database access (CRUD) for volunteers. */
-public class VolunteerRepository {
+@RegisterConstructorMapper(Volunteer.class)
+public interface VolunteerRepository {
 
-    public void add(Volunteer v) {
-        String sql = "INSERT INTO volunteers(name, skills, availability, hours) VALUES(?,?,?,?)";
-        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement(sql)) {
-            ps.setString(1, v.getName()); ps.setString(2, v.getSkills());
-            ps.setString(3, v.getAvailability()); ps.setDouble(4, v.getHours());
-            ps.executeUpdate();
-        } catch (SQLException e) { throw new RuntimeException(e); }
-    }
+    @SqlUpdate("INSERT INTO volunteers(name, skills, availability, hours) VALUES(:name, :skills, :availability, :hours)")
+    void add(@BindBean Volunteer v);
 
-    public List<Volunteer> findAll() {
-        List<Volunteer> list = new ArrayList<>();
-        try (Statement st = DatabaseConnection.getInstance().getConnection().createStatement();
-             ResultSet rs = st.executeQuery("SELECT * FROM volunteers")) {
-            while (rs.next()) {
-                list.add(new Volunteer(rs.getInt("id"), rs.getString("name"),
-                        rs.getString("skills"), rs.getString("availability"), rs.getDouble("hours")));
-            }
-        } catch (SQLException e) { throw new RuntimeException(e); }
-        return list;
-    }
+    @SqlQuery("SELECT * FROM volunteers")
+    List<Volunteer> findAll();
 
-    public void update(Volunteer v) {
-        String sql = "UPDATE volunteers SET name=?, skills=?, availability=?, hours=? WHERE id=?";
-        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement(sql)) {
-            ps.setString(1, v.getName()); ps.setString(2, v.getSkills());
-            ps.setString(3, v.getAvailability()); ps.setDouble(4, v.getHours());
-            ps.setInt(5, v.getId());
-            ps.executeUpdate();
-        } catch (SQLException e) { throw new RuntimeException(e); }
-    }
+    @SqlUpdate("UPDATE volunteers SET name=:name, skills=:skills, availability=:availability, hours=:hours WHERE id=:id")
+    void update(@BindBean Volunteer v);
 
-    public void delete(int id) {
-        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement("DELETE FROM volunteers WHERE id=?")) {
-            ps.setInt(1, id);
-            ps.executeUpdate();
-        } catch (SQLException e) { throw new RuntimeException(e); }
-    }
+    @SqlUpdate("DELETE FROM volunteers WHERE id=:id")
+    void delete(int id);
 }

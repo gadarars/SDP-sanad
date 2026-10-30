@@ -1,84 +1,37 @@
 package com.sanad.model.lookup;
 
-import com.sanad.db.DatabaseConnection;
+import org.jdbi.v3.sqlobject.config.RegisterConstructorMapper;
+import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.statement.SqlQuery;
+import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 
-import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * MODEL: database access (full CRUD) for lookups.
  */
-public class LookupRepository {
+@RegisterConstructorMapper(Lookup.class)
+public interface LookupRepository {
 
     // CREATE
-    public void add(Lookup x) {
-        String sql = "INSERT INTO lookups(kind, name) VALUES(?, ?)";
-        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement(sql)) {
-            ps.setString(1, x.getKind());
-            ps.setString(2, x.getName());
-            ps.executeUpdate();
-        } catch (SQLIntegrityConstraintViolationException e) {
-            throw new IllegalArgumentException("'" + x.getName() + "' already exists for " + x.getKind());
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    @SqlUpdate("INSERT INTO lookups(kind, name) VALUES(:kind, :name)")
+    void add(@BindBean Lookup x);
 
     // READ
-    public List<Lookup> findAll() {
-        List<Lookup> list = new ArrayList<>();
-        try (Statement st = DatabaseConnection.getInstance().getConnection().createStatement();
-             ResultSet rs = st.executeQuery("SELECT * FROM lookups")) {
-            while (rs.next()) {
-                list.add(new Lookup(rs.getInt("id"), rs.getString("kind"), rs.getString("name")));
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return list;
-    }
+    @SqlQuery("SELECT * FROM lookups")
+    List<Lookup> findAll();
 
     /**
      * Returns the lookups of one kind, e.g. the options for a dropdown.
      */
-    public List<Lookup> findByKind(String kind) {
-        List<Lookup> list = new ArrayList<>();
-        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement("SELECT * FROM lookups WHERE kind=? ORDER BY id")) {
-            ps.setString(1, kind);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    list.add(new Lookup(rs.getInt("id"), rs.getString("kind"), rs.getString("name")));
-                }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return list;
-    }
+    @SqlQuery("SELECT * FROM lookups WHERE kind=:kind ORDER BY id")
+    List<Lookup> findByKind(String kind);
 
     // UPDATE
-    public void update(Lookup x) {
-        String sql = "UPDATE lookups SET kind=?, name=? WHERE id=?";
-        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement(sql)) {
-            ps.setString(1, x.getKind());
-            ps.setString(2, x.getName());
-            ps.setInt(3, x.getId());
-            ps.executeUpdate();
-        } catch (SQLIntegrityConstraintViolationException e) {
-            throw new IllegalArgumentException("'" + x.getName() + "' already exists for " + x.getKind());
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    @SqlUpdate("UPDATE lookups SET kind=:kind, name=:name WHERE id=:id")
+    void update(@BindBean Lookup x);
 
     // DELETE
-    public void delete(int id) {
-        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement("DELETE FROM lookups WHERE id=?")) {
-            ps.setInt(1, id);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    @SqlUpdate("DELETE FROM lookups WHERE id=:id")
+    void delete(int id);
 }

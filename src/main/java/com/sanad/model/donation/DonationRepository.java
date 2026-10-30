@@ -1,53 +1,28 @@
 package com.sanad.model.donation;
 
-import com.sanad.db.DatabaseConnection;
-import java.sql.*;
-import java.util.ArrayList;
+import org.jdbi.v3.sqlobject.config.RegisterConstructorMapper;
+import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.statement.SqlQuery;
+import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import java.util.List;
 
 /** MODEL: database access (full CRUD) for donations. */
-public class DonationRepository {
+@RegisterConstructorMapper(Donation.class)
+public interface DonationRepository {
 
     // CREATE
-    public void add(Donation x) {
-        String sql = "INSERT INTO donations(donor_name, amount, type) VALUES(?, ?, ?)";
-        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement(sql)) {
-            ps.setString(1, x.getDonorName());
-            ps.setDouble(2, x.getAmount());
-            ps.setString(3, x.getType());
-            ps.executeUpdate();
-        } catch (SQLException e) { throw new RuntimeException(e); }
-    }
+    @SqlUpdate("INSERT INTO donations(donor_name, amount, type) VALUES(:donorName, :amount, :type)")
+    void add(@BindBean Donation x);
 
     // READ
-    public List<Donation> findAll() {
-        List<Donation> list = new ArrayList<>();
-        try (Statement st = DatabaseConnection.getInstance().getConnection().createStatement();
-             ResultSet rs = st.executeQuery("SELECT * FROM donations")) {
-            while (rs.next()) {
-                list.add(new Donation(rs.getInt("id"), rs.getString("donor_name"), rs.getDouble("amount"), rs.getString("type")));
-            }
-        } catch (SQLException e) { throw new RuntimeException(e); }
-        return list;
-    }
+    @SqlQuery("SELECT * FROM donations")
+    List<Donation> findAll();
 
     // UPDATE
-    public void update(Donation x) {
-        String sql = "UPDATE donations SET donor_name=?, amount=?, type=? WHERE id=?";
-        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement(sql)) {
-            ps.setString(1, x.getDonorName());
-            ps.setDouble(2, x.getAmount());
-            ps.setString(3, x.getType());
-            ps.setInt(4, x.getId());
-            ps.executeUpdate();
-        } catch (SQLException e) { throw new RuntimeException(e); }
-    }
+    @SqlUpdate("UPDATE donations SET donor_name=:donorName, amount=:amount, type=:type WHERE id=:id")
+    void update(@BindBean Donation x);
 
     // DELETE
-    public void delete(int id) {
-        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement("DELETE FROM donations WHERE id=?")) {
-            ps.setInt(1, id);
-            ps.executeUpdate();
-        } catch (SQLException e) { throw new RuntimeException(e); }
-    }
+    @SqlUpdate("DELETE FROM donations WHERE id=:id")
+    void delete(int id);
 }

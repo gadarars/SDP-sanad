@@ -1,0 +1,12 @@
+INSERT INTO lookups(kind, name)
+VALUES ('EVENT_CATEGORY', 'FUNDRAISER'),
+       ('EVENT_CATEGORY', 'WORKSHOP'),
+       ('EVENT_CATEGORY', 'OUTREACH'),
+       ('NEED_TYPE', 'FOOD'),
+       ('NEED_TYPE', 'MEDICAL'),
+       ('NEED_TYPE', 'EDUCATION'),
+       ('NEED_TYPE', 'SHELTER'),
+       ('VOLUNTEER_SKILL', 'TEACHING'),
+       ('VOLUNTEER_SKILL', 'FIRST_AID'),
+       ('VOLUNTEER_SKILL', 'LOGISTICS'),
+       ('VOLUNTEER_SKILL', 'FUNDRAISING');

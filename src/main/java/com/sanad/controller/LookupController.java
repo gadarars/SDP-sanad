@@ -1,8 +1,11 @@
 package com.sanad.controller;
 
+import com.sanad.db.DatabaseConnection;
 import com.sanad.model.lookup.Lookup;
 import com.sanad.model.lookup.LookupRepository;
+import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import java.util.Locale;
 
@@ -11,29 +14,29 @@ import java.util.Locale;
  */
 public class LookupController {
 
-    private final LookupRepository repo = new LookupRepository();
-
     public List<Lookup> getAll() {
-        return repo.findAll();
+        return repo().findAll();
     }
 
     /**
      * Values of one kind in the order they were added, e.g. the options for a dropdown.
      */
     public List<String> getNames(String kind) {
-        return repo.findByKind(normalizeKind(kind)).stream().map(Lookup::getName).toList();
+        return repo().findByKind(normalizeKind(kind)).stream().map(Lookup::getName).toList();
     }
 
     public void add(String kind, String name) {
-        repo.add(validated(0, kind, name));
+        Lookup x = validated(0, kind, name);
+        unique(x, () -> repo().add(x));
     }
 
     public void update(int id, String kind, String name) {
-        repo.update(validated(id, kind, name));
+        Lookup x = validated(id, kind, name);
+        unique(x, () -> repo().update(x));
     }
 
     public void delete(int id) {
-        repo.delete(id);
+        repo().delete(id);
     }
 
     /**
@@ -54,5 +57,21 @@ public class LookupController {
         if (k.length() > 50) throw new IllegalArgumentException("Kind must be at most 50 characters");
         if (n.length() > 255) throw new IllegalArgumentException("Value must be at most 255 characters");
         return new Lookup(id, k, n);
+    }
+
+    /**
+     * Runs the write, reporting a kind and value that already exist as a validation error.
+     */
+    private static void unique(Lookup x, Runnable write) {
+        try {
+            write.run();
+        } catch (UnableToExecuteStatementException e) {
+            if (!(e.getCause() instanceof SQLIntegrityConstraintViolationException)) throw e;
+            throw new IllegalArgumentException("'" + x.getName() + "' already exists for " + x.getKind());
+        }
+    }
+
+    private static LookupRepository repo() {
+        return DatabaseConnection.getInstance().getJdbi().onDemand(LookupRepository.class);
     }
 }

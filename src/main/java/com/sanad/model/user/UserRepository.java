@@ -1,46 +1,24 @@
 package com.sanad.model.user;
 
-import com.sanad.db.DatabaseConnection;
-import java.sql.*;
-import java.util.ArrayList;
+import org.jdbi.v3.sqlobject.config.RegisterConstructorMapper;
+import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.statement.SqlQuery;
+import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import java.util.List;
 
 /** MODEL: database access (CRUD) for users. */
-public class UserRepository {
+@RegisterConstructorMapper(User.class)
+public interface UserRepository {
 
-    public void add(User u) {
-        String sql = "INSERT INTO users(username, email, role) VALUES(?,?,?)";
-        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement(sql)) {
-            ps.setString(1, u.getUsername()); ps.setString(2, u.getEmail()); ps.setString(3, u.getRole());
-            ps.executeUpdate();
-        } catch (SQLException e) { throw new RuntimeException(e); }
-    }
+    @SqlUpdate("INSERT INTO users(username, email, role) VALUES(:username, :email, :role)")
+    void add(@BindBean User u);
 
-    public List<User> findAll() {
-        List<User> list = new ArrayList<>();
-        try (Statement st = DatabaseConnection.getInstance().getConnection().createStatement();
-             ResultSet rs = st.executeQuery("SELECT * FROM users")) {
-            while (rs.next()) {
-                list.add(new User(rs.getInt("id"), rs.getString("username"),
-                        rs.getString("email"), rs.getString("role")));
-            }
-        } catch (SQLException e) { throw new RuntimeException(e); }
-        return list;
-    }
+    @SqlQuery("SELECT * FROM users")
+    List<User> findAll();
 
-    public void update(User u) {
-        String sql = "UPDATE users SET username=?, email=?, role=? WHERE id=?";
-        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement(sql)) {
-            ps.setString(1, u.getUsername()); ps.setString(2, u.getEmail());
-            ps.setString(3, u.getRole()); ps.setInt(4, u.getId());
-            ps.executeUpdate();
-        } catch (SQLException e) { throw new RuntimeException(e); }
-    }
+    @SqlUpdate("UPDATE users SET username=:username, email=:email, role=:role WHERE id=:id")
+    void update(@BindBean User u);
 
-    public void delete(int id) {
-        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement("DELETE FROM users WHERE id=?")) {
-            ps.setInt(1, id);
-            ps.executeUpdate();
-        } catch (SQLException e) { throw new RuntimeException(e); }
-    }
+    @SqlUpdate("DELETE FROM users WHERE id=:id")
+    void delete(int id);
 }

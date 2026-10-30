@@ -1,48 +1,24 @@
 package com.sanad.model.event;
 
-import com.sanad.db.DatabaseConnection;
-import java.sql.*;
-import java.util.ArrayList;
+import org.jdbi.v3.sqlobject.config.RegisterConstructorMapper;
+import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.statement.SqlQuery;
+import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import java.util.List;
 
 /** MODEL: database access (CRUD) for events. */
-public class EventRepository {
+@RegisterConstructorMapper(Event.class)
+public interface EventRepository {
 
-    public void add(Event e) {
-        String sql = "INSERT INTO events(name, date, location, category) VALUES(?,?,?,?)";
-        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement(sql)) {
-            ps.setString(1, e.getName()); ps.setString(2, e.getDate());
-            ps.setString(3, e.getLocation()); ps.setString(4, e.getCategory());
-            ps.executeUpdate();
-        } catch (SQLException ex) { throw new RuntimeException(ex); }
-    }
+    @SqlUpdate("INSERT INTO events(name, date, location, category) VALUES(:name, :date, :location, :category)")
+    void add(@BindBean Event e);
 
-    public List<Event> findAll() {
-        List<Event> list = new ArrayList<>();
-        try (Statement st = DatabaseConnection.getInstance().getConnection().createStatement();
-             ResultSet rs = st.executeQuery("SELECT * FROM events")) {
-            while (rs.next()) {
-                list.add(new Event(rs.getInt("id"), rs.getString("name"),
-                        rs.getString("date"), rs.getString("location"), rs.getString("category")));
-            }
-        } catch (SQLException ex) { throw new RuntimeException(ex); }
-        return list;
-    }
+    @SqlQuery("SELECT * FROM events")
+    List<Event> findAll();
 
-    public void update(Event e) {
-        String sql = "UPDATE events SET name=?, date=?, location=?, category=? WHERE id=?";
-        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement(sql)) {
-            ps.setString(1, e.getName()); ps.setString(2, e.getDate());
-            ps.setString(3, e.getLocation()); ps.setString(4, e.getCategory());
-            ps.setInt(5, e.getId());
-            ps.executeUpdate();
-        } catch (SQLException ex) { throw new RuntimeException(ex); }
-    }
+    @SqlUpdate("UPDATE events SET name=:name, date=:date, location=:location, category=:category WHERE id=:id")
+    void update(@BindBean Event e);
 
-    public void delete(int id) {
-        try (PreparedStatement ps = DatabaseConnection.getInstance().getConnection().prepareStatement("DELETE FROM events WHERE id=?")) {
-            ps.setInt(1, id);
-            ps.executeUpdate();
-        } catch (SQLException ex) { throw new RuntimeException(ex); }
-    }
+    @SqlUpdate("DELETE FROM events WHERE id=:id")
+    void delete(int id);
 }

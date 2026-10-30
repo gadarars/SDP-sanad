@@ -17,7 +17,7 @@ On Windows use `.\mvnw.cmd javafx:run` in PowerShell, or `mvnw javafx:run` in CM
 
 That one command compiles the code, starts MySQL in Docker and opens the app.
 The first run downloads the MySQL image, so it takes longer.
-The app creates its tables on first start.
+On start the app runs the Flyway migrations in `src/main/resources/db/migration`, which create the tables and starting lookups.
 
 | To | Run |
 |---|---|
@@ -49,7 +49,9 @@ View (button click) -> Controller (validate) -> Repository (SQL) -> MySQL
 Views never talk to the database directly.
 
 **Adding a module:** copy the four Volunteer files (`Volunteer`, `VolunteerRepository`, `VolunteerController`,
-`VolunteerView`) and rename them. Then add its table in `db/DatabaseConnection.java` and its tab in `view/MainView.java`.
+`VolunteerView`) and rename them. Then add its table in a new migration such as
+`src/main/resources/db/migration/V3__create_grants.sql` and its tab in `view/MainView.java`. Never edit a migration that
+has already run.
 
 ## Team rules
 
