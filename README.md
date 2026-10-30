@@ -17,12 +17,16 @@ On Windows use `.\mvnw.cmd javafx:run` in PowerShell, or `mvnw javafx:run` in CM
 
 That one command compiles the code, starts MySQL in Docker and opens the app.
 The first run downloads the MySQL image, so it takes longer.
-On start the app runs the Flyway migrations in `src/main/resources/db/migration`, which create the tables and starting lookups.
+On start the app runs the Flyway migrations in `src/main/resources/db/migration`, which create the tables and starting
+lookups.
 
-| To | Run |
-|---|---|
-| Stop MySQL | `docker compose down` |
+| To            | Run                      |
+|---------------|--------------------------|
+| Stop MySQL    | `docker compose down`    |
 | Wipe all data | `docker compose down -v` |
+
+The app opens on a login screen. On a new database, sign in as `admin` with password `admin123`, then change that
+password in the Users tab. Each user type only sees its own sidebar sections.
 
 MySQL keeps running after you close the app. Data lives in the Docker volume `mysql-data`, so it survives restarts.
 
@@ -34,6 +38,7 @@ MySQL keeps running after you close the app. Data lives in the Docker volume `my
 ```
 com.sanad
 ├── App.java        starts the program
+├── auth/           Session (Singleton) + PasswordHasher
 ├── db/             DatabaseConnection (Singleton)
 ├── model/          data classes + repositories (SQL), one package per module
 ├── controller/     one per module: validates input, calls the repository

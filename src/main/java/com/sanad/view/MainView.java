@@ -4,6 +4,9 @@ import atlantafx.base.theme.PrimerDark;
 import atlantafx.base.theme.PrimerLight;
 import atlantafx.base.theme.Styles;
 import atlantafx.base.theme.Tweaks;
+import com.sanad.auth.Session;
+import com.sanad.model.user.Feature;
+import com.sanad.model.user.User;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.scene.control.Button;
@@ -24,20 +27,26 @@ import java.util.List;
  */
 public class MainView extends BorderPane {
 
-    private record Section(String title, Ikon icon, CrudView<?> view) {
+    private record Section(String title, Ikon icon, Feature feature, CrudView<?> view) {
     }
 
     private boolean dark;
 
-    public MainView() {
+    /**
+     * Shows only the sections the logged-in user's type is allowed to open.
+     */
+    public MainView(Runnable onLogout) {
+        User user = Session.getInstance().getCurrentUser();
         applyTheme();
-        ListView<Section> nav = new ListView<>(FXCollections.observableArrayList(List.of(
-                new Section("Donations", Feather.GIFT, new DonationView()),
-                new Section("Volunteers", Feather.USERS, new VolunteerView()),
-                new Section("Events", Feather.CALENDAR, new EventView()),
-                new Section("Beneficiaries", Feather.HEART, new BeneficiaryView()),
-                new Section("Users", Feather.SHIELD, new UserView()),
-                new Section("Lookup tables", Feather.LIST, new LookupView()))));
+        List<Section> sections = List.of(
+                new Section("Donations", Feather.GIFT, Feature.DONATIONS, new DonationView()),
+                new Section("Volunteers", Feather.USERS, Feature.VOLUNTEERS, new VolunteerView()),
+                new Section("Events", Feather.CALENDAR, Feature.EVENTS, new EventView()),
+                new Section("Beneficiaries", Feather.HEART, Feature.BENEFICIARIES, new BeneficiaryView()),
+                new Section("Users", Feather.SHIELD, Feature.USERS, new UserView()),
+                new Section("Lookup tables", Feather.LIST, Feature.LOOKUPS, new LookupView()));
+        ListView<Section> nav = new ListView<>(FXCollections.observableArrayList(
+                sections.stream().filter(s -> user.getFeatures().contains(s.feature())).toList()));
         nav.getStyleClass().add(Tweaks.EDGE_TO_EDGE);
         nav.setCellFactory(list -> new ListCell<>() {
             @Override
@@ -58,7 +67,13 @@ public class MainView extends BorderPane {
         Label brand = new Label("Sanad");
         brand.getStyleClass().addAll("brand", Styles.TITLE_3);
 
-        VBox sidebar = new VBox(12, brand, nav, themeToggle());
+        Label who = new Label(user.getUsername() + " (" + ViewUtil.pretty(user.getRole()) + ")");
+        who.getStyleClass().add(Styles.TEXT_MUTED);
+        Button logout = new Button("Log out", new FontIcon(Feather.LOG_OUT));
+        logout.getStyleClass().add(Styles.FLAT);
+        logout.setOnAction(e -> onLogout.run());
+
+        VBox sidebar = new VBox(12, brand, nav, who, themeToggle(), logout);
         sidebar.getStyleClass().add("sidebar");
         VBox.setVgrow(nav, Priority.ALWAYS);
         setLeft(sidebar);

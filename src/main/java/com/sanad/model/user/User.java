@@ -1,19 +1,22 @@
 package com.sanad.model.user;
 
-/**
- * MODEL: a system user with a role (ADMIN, STAFF, DONOR, VOLUNTEER, BENEFICIARY).
- */
-public class User {
-    private int id;
-    private String username;
-    private String email;
-    private String role;
+import java.util.Map;
+import java.util.Set;
 
-    public User(int id, String username, String email, String role) {
+/**
+ * MODEL: the common parent of every user type.
+ * Each subclass adds its own fields and decides which features it may open.
+ * Objects are created only through UserFactory.
+ */
+public abstract class User {
+    private final int id;
+    private final String username;
+    private final String email;
+
+    protected User(int id, String username, String email) {
         this.id = id;
         this.username = username;
         this.email = email;
-        this.role = role;
     }
 
     public int getId() {
@@ -28,7 +31,22 @@ public class User {
         return email;
     }
 
+    public abstract UserType getType();
+
+    /**
+     * The role name stored in the database, e.g. "ADMIN".
+     */
     public String getRole() {
-        return role;
+        return getType().name();
     }
+
+    /**
+     * Which features this kind of user may open after login.
+     */
+    public abstract Set<Feature> getFeatures();
+
+    /**
+     * This type's own fields keyed by column name, e.g. {"phone": "0100 123 4567"}.
+     */
+    public abstract Map<String, String> getDetails();
 }

@@ -64,16 +64,17 @@ public class ViewUtil {
     /**
      * Drop-down of stored codes that displays them with {@link #pretty}.
      */
-    public static ComboBox<String> choice(String... codes) {
-        ComboBox<String> box = new ComboBox<>(FXCollections.observableArrayList(codes));
+    @SafeVarargs
+    public static <T> ComboBox<T> choice(T... codes) {
+        ComboBox<T> box = new ComboBox<>(FXCollections.observableArrayList(codes));
         box.setConverter(new StringConverter<>() {
             @Override
-            public String toString(String code) {
+            public String toString(T code) {
                 return code == null ? "" : pretty(code);
             }
 
             @Override
-            public String fromString(String text) {
+            public T fromString(String text) {
                 return null; // only used by editable combo boxes
             }
         });
