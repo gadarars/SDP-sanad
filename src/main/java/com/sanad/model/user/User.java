@@ -1,19 +1,22 @@
 package com.sanad.model.user;
 
-/**
- * MODEL: a system user with a role (ADMIN, STAFF, DONOR, VOLUNTEER, BENEFICIARY).
- */
-public class User {
-    private int id;
-    private String username;
-    private String email;
-    private String role;
+import java.util.List;
 
-    public User(int id, String username, String email, String role) {
+/**
+ * MODEL: the common parent of every user type.
+ * Each role (Admin, Staff, Donor, Volunteer, Beneficiary) is a subclass that
+ * answers three questions differently: getRole(), getPermissions() and getAllowedTabs().
+ * Objects are created only through UserFactory.
+ */
+public abstract class User {
+    private final int id;
+    private final String username;
+    private final String email;
+
+    protected User(int id, String username, String email) {
         this.id = id;
         this.username = username;
         this.email = email;
-        this.role = role;
     }
 
     public int getId() {
@@ -28,7 +31,18 @@ public class User {
         return email;
     }
 
-    public String getRole() {
-        return role;
-    }
+    /**
+     * The role name stored in the database, e.g. "ADMIN".
+     */
+    public abstract String getRole();
+
+    /**
+     * What this kind of user is allowed to do (shown in the table).
+     */
+    public abstract String getPermissions();
+
+    /**
+     * Which sidebar sections this kind of user may open after login.
+     */
+    public abstract List<String> getAllowedTabs();
 }

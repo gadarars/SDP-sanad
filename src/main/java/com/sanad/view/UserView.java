@@ -3,6 +3,7 @@ package com.sanad.view;
 import com.sanad.controller.UserController;
 import com.sanad.model.user.User;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
 import java.util.List;
@@ -16,6 +17,7 @@ public class UserView extends CrudView<User> {
 
     private final UserController controller = new UserController();
     private final TextField usernameF = new TextField(), emailF = new TextField();
+    private final PasswordField passwordF = new PasswordField();
     private final ComboBox<String> roleBox = ViewUtil.choice("ADMIN", "STAFF", "DONOR", "VOLUNTEER", "BENEFICIARY");
 
     public UserView() {
@@ -23,9 +25,12 @@ public class UserView extends CrudView<User> {
         roleBox.setValue(DEFAULT_ROLE);
 
         table.getColumns().addAll(ViewUtil.<User>idCol(), ViewUtil.<User>col("Username", "username"),
-                ViewUtil.<User>col("Email", "email"), ViewUtil.<User>col("Role", "role", ViewUtil::pretty));
+                ViewUtil.<User>col("Email", "email"), ViewUtil.<User>col("Role", "role", ViewUtil::pretty), ViewUtil.<User>col("Permissions", "permissions"));
 
-        build(ViewUtil.field("Username", usernameF), ViewUtil.field("Email", emailF), ViewUtil.field("Role", roleBox));
+        passwordF.setPromptText("blank = keep current");
+
+        build(ViewUtil.field("Username", usernameF), ViewUtil.field("Email", emailF),
+                ViewUtil.field("Password", passwordF), ViewUtil.field("Role", roleBox));
     }
 
     @Override
@@ -44,17 +49,18 @@ public class UserView extends CrudView<User> {
     protected void clearForm() {
         usernameF.clear();
         emailF.clear();
+        passwordF.clear();
         roleBox.setValue(DEFAULT_ROLE);
     }
 
     @Override
     protected void add() {
-        controller.add(usernameF.getText(), emailF.getText(), roleBox.getValue());
+        controller.add(usernameF.getText(), emailF.getText(), roleBox.getValue(), passwordF.getText());
     }
 
     @Override
     protected void update(User v) {
-        controller.update(v.getId(), usernameF.getText(), emailF.getText(), roleBox.getValue());
+        controller.update(v.getId(), usernameF.getText(), emailF.getText(), roleBox.getValue(), passwordF.getText());
     }
 
     @Override

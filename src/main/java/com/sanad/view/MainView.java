@@ -6,6 +6,7 @@ import atlantafx.base.theme.Styles;
 import atlantafx.base.theme.Tweaks;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
+import com.sanad.model.user.User;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -29,15 +30,20 @@ public class MainView extends BorderPane {
 
     private boolean dark;
 
-    public MainView() {
+    /**
+     * Shows only the sections the logged-in user's role is allowed to open.
+     */
+    public MainView(User user, Runnable onLogout) {
         applyTheme();
-        ListView<Section> nav = new ListView<>(FXCollections.observableArrayList(List.of(
+        List<Section> sections = List.of(
                 new Section("Donations", Feather.GIFT, new DonationView()),
                 new Section("Volunteers", Feather.USERS, new VolunteerView()),
                 new Section("Events", Feather.CALENDAR, new EventView()),
                 new Section("Beneficiaries", Feather.HEART, new BeneficiaryView()),
                 new Section("Users", Feather.SHIELD, new UserView()),
-                new Section("Lookup tables", Feather.LIST, new LookupView()))));
+                new Section("Lookup tables", Feather.LIST, new LookupView()));
+        ListView<Section> nav = new ListView<>(FXCollections.observableArrayList(
+                sections.stream().filter(s -> user.getAllowedTabs().contains(s.title())).toList()));
         nav.getStyleClass().add(Tweaks.EDGE_TO_EDGE);
         nav.setCellFactory(list -> new ListCell<>() {
             @Override
@@ -58,7 +64,13 @@ public class MainView extends BorderPane {
         Label brand = new Label("Sanad");
         brand.getStyleClass().addAll("brand", Styles.TITLE_3);
 
-        VBox sidebar = new VBox(12, brand, nav, themeToggle());
+        Label who = new Label(user.getUsername() + " (" + ViewUtil.pretty(user.getRole()) + ")");
+        who.getStyleClass().add(Styles.TEXT_MUTED);
+        Button logout = new Button("Log out", new FontIcon(Feather.LOG_OUT));
+        logout.getStyleClass().add(Styles.FLAT);
+        logout.setOnAction(e -> onLogout.run());
+
+        VBox sidebar = new VBox(12, brand, nav, who, themeToggle(), logout);
         sidebar.getStyleClass().add("sidebar");
         VBox.setVgrow(nav, Priority.ALWAYS);
         setLeft(sidebar);
