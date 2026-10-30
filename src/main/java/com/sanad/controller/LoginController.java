@@ -1,5 +1,7 @@
 package com.sanad.controller;
 
+import com.sanad.auth.PasswordHasher;
+import com.sanad.auth.Session;
 import com.sanad.db.DatabaseConnection;
 import com.sanad.model.user.*;
 

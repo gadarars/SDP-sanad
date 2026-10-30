@@ -1,4 +1,4 @@
-package com.sanad.model.user;
+package com.sanad.auth;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;

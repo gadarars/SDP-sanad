@@ -1,4 +1,6 @@
-package com.sanad.model.user;
+package com.sanad.auth;
+
+import com.sanad.model.user.User;
 
 /**
  * SINGLETON PATTERN (second use).

@@ -38,6 +38,7 @@ MySQL keeps running after you close the app. Data lives in the Docker volume `my
 ```
 com.sanad
 ├── App.java        starts the program
+├── auth/           Session (Singleton) + PasswordHasher
 ├── db/             DatabaseConnection (Singleton)
 ├── model/          data classes + repositories (SQL), one package per module
 ├── controller/     one per module: validates input, calls the repository
