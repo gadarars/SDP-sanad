@@ -21,11 +21,11 @@ public class DatabaseConnection {
             Lookup.NEED_TYPE, List.of("FOOD", "MEDICAL", "EDUCATION", "SHELTER"),
             Lookup.VOLUNTEER_SKILL, List.of("TEACHING", "FIRST_AID", "LOGISTICS", "FUNDRAISING"));
 
-    private static DatabaseConnection instance;   // the one and only instance
+    private static DatabaseConnection instance;
     private final Properties settings = new Properties();
     private Connection connection;
 
-    private DatabaseConnection() {                // private: nobody else can call new
+    private DatabaseConnection() {
         try (InputStream in = DatabaseConnection.class.getResourceAsStream("/db.properties")) {
             settings.load(in);
             connection = open();

@@ -45,9 +45,10 @@ public class LookupController {
 
     private static Lookup validated(int id, String kind, String name) {
         if (kind == null || kind.isBlank())
-            throw new IllegalArgumentException("Kind (e.g. EVENT_CATEGORY) is required");
+            throw new IllegalArgumentException("Kind is required");
         if (name == null || name.isBlank()) throw new IllegalArgumentException("Value is required");
-        String k = normalizeKind(kind), n = name.strip();
+        String k = normalizeKind(kind);
+        String n = name.strip();
         if (!k.matches("[A-Z][A-Z0-9_]*"))
             throw new IllegalArgumentException("Kind may only use letters, digits and underscores");
         if (k.length() > 50) throw new IllegalArgumentException("Kind must be at most 50 characters");
