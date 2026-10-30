@@ -48,7 +48,7 @@ public class ViewUtil {
      * Right-aligned column for numbers, shown with thousands separators.
      */
     public static <T> TableColumn<T, Object> numberCol(String title, String property, String pattern) {
-        TableColumn<T, Object> c = col(title, property, v -> String.format(pattern, ((Number) v).doubleValue()));
+        TableColumn<T, Object> c = col(title, property, v -> String.format(pattern, v));
         c.getStyleClass().add(Tweaks.ALIGN_RIGHT);
         return c;
     }
@@ -98,18 +98,18 @@ public class ViewUtil {
     }
 
     /**
-     * Number as typed in a form field: 300.0 becomes "300", 1250.5 stays "1250.5".
+     * Number as typed in a form field: 300.00 becomes "300", 1250.50 becomes "1250.5".
      */
-    public static String plain(double value) {
-        return BigDecimal.valueOf(value).stripTrailingZeros().toPlainString();
+    public static String plain(BigDecimal value) {
+        return value.stripTrailingZeros().toPlainString();
     }
 
     /**
      * Parses a number field, outlining it in red when the text is not a number.
      */
-    public static double number(TextField field, String caption) {
+    public static BigDecimal number(TextField field, String caption) {
         try {
-            return Double.parseDouble(field.getText().strip());
+            return new BigDecimal(field.getText().strip());
         } catch (NumberFormatException ex) {
             field.pseudoClassStateChanged(Styles.STATE_DANGER, true);
             throw new IllegalArgumentException(caption + " must be a number");

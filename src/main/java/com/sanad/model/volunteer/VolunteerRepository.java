@@ -13,7 +13,7 @@ public interface VolunteerRepository {
     @SqlUpdate("INSERT INTO volunteers(name, skills, availability, hours) VALUES(:name, :skills, :availability, :hours)")
     void add(@BindBean Volunteer v);
 
-    @SqlQuery("SELECT * FROM volunteers")
+    @SqlQuery("SELECT * FROM volunteers ORDER BY id")
     List<Volunteer> findAll();
 
     @SqlUpdate("UPDATE volunteers SET name=:name, skills=:skills, availability=:availability, hours=:hours WHERE id=:id")

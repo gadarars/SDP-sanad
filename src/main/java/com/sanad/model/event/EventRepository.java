@@ -13,7 +13,7 @@ public interface EventRepository {
     @SqlUpdate("INSERT INTO events(name, date, location, category) VALUES(:name, :date, :location, :category)")
     void add(@BindBean Event e);
 
-    @SqlQuery("SELECT * FROM events")
+    @SqlQuery("SELECT * FROM events ORDER BY id")
     List<Event> findAll();
 
     @SqlUpdate("UPDATE events SET name=:name, date=:date, location=:location, category=:category WHERE id=:id")

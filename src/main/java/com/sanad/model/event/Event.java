@@ -1,16 +1,18 @@
 package com.sanad.model.event;
 
+import java.time.LocalDate;
+
 /**
  * MODEL: an event (fundraiser, workshop, outreach...).
  */
 public class Event {
     private int id;
     private String name;
-    private String date;      // simple text like 2026-12-01
+    private LocalDate date;
     private String location;
     private String category;
 
-    public Event(int id, String name, String date, String location, String category) {
+    public Event(int id, String name, LocalDate date, String location, String category) {
         this.id = id;
         this.name = name;
         this.date = date;
@@ -26,7 +28,7 @@ public class Event {
         return name;
     }
 
-    public String getDate() {
+    public LocalDate getDate() {
         return date;
     }
 

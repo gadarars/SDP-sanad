@@ -15,7 +15,7 @@ public interface DonationRepository {
     void add(@BindBean Donation x);
 
     // READ
-    @SqlQuery("SELECT * FROM donations")
+    @SqlQuery("SELECT * FROM donations ORDER BY id")
     List<Donation> findAll();
 
     // UPDATE

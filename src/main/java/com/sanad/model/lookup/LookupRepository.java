@@ -18,7 +18,7 @@ public interface LookupRepository {
     void add(@BindBean Lookup x);
 
     // READ
-    @SqlQuery("SELECT * FROM lookups")
+    @SqlQuery("SELECT * FROM lookups ORDER BY kind, id")
     List<Lookup> findAll();
 
     /**

@@ -4,6 +4,7 @@ import com.sanad.controller.VolunteerController;
 import com.sanad.model.volunteer.Volunteer;
 import javafx.scene.control.TextField;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -27,8 +28,8 @@ public class VolunteerView extends CrudView<Volunteer> {
                 ViewUtil.field("Availability", availF), ViewUtil.field("Hours", hoursF));
     }
 
-    private double hours() {
-        return hoursF.getText().isBlank() ? 0 : ViewUtil.number(hoursF, "Hours");
+    private BigDecimal hours() {
+        return hoursF.getText().isBlank() ? BigDecimal.ZERO : ViewUtil.number(hoursF, "Hours");
     }
 
     @Override

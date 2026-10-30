@@ -16,7 +16,7 @@ public interface BeneficiaryRepository {
     @SqlUpdate("INSERT INTO beneficiaries(name, need, contact) VALUES(:name, :need, :contact)")
     void add(@BindBean Beneficiary b);
 
-    @SqlQuery("SELECT * FROM beneficiaries")
+    @SqlQuery("SELECT * FROM beneficiaries ORDER BY id")
     List<Beneficiary> findAll();
 
     @SqlUpdate("UPDATE beneficiaries SET name=:name, need=:need, contact=:contact WHERE id=:id")

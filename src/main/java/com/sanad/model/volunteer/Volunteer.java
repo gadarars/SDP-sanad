@@ -1,5 +1,7 @@
 package com.sanad.model.volunteer;
 
+import java.math.BigDecimal;
+
 /**
  * MODEL: a volunteer with skills, availability and logged hours.
  */
@@ -8,9 +10,9 @@ public class Volunteer {
     private String name;
     private String skills;
     private String availability;
-    private double hours;
+    private BigDecimal hours;
 
-    public Volunteer(int id, String name, String skills, String availability, double hours) {
+    public Volunteer(int id, String name, String skills, String availability, BigDecimal hours) {
         this.id = id;
         this.name = name;
         this.skills = skills;
@@ -34,7 +36,7 @@ public class Volunteer {
         return availability;
     }
 
-    public double getHours() {
+    public BigDecimal getHours() {
         return hours;
     }
 }

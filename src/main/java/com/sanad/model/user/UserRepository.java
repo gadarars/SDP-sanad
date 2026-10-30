@@ -13,7 +13,7 @@ public interface UserRepository {
     @SqlUpdate("INSERT INTO users(username, email, role) VALUES(:username, :email, :role)")
     void add(@BindBean User u);
 
-    @SqlQuery("SELECT * FROM users")
+    @SqlQuery("SELECT * FROM users ORDER BY id")
     List<User> findAll();
 
     @SqlUpdate("UPDATE users SET username=:username, email=:email, role=:role WHERE id=:id")

@@ -6,9 +6,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 import javafx.util.converter.LocalDateStringConverter;
 
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 
 /**
@@ -33,28 +31,6 @@ public class EventView extends CrudView<Event> {
                 ViewUtil.field("Location", locF), ViewUtil.field("Category", catF));
     }
 
-    private String date() {
-        return datePicker.getValue() == null ? "" : datePicker.getValue().toString();
-    }
-
-    /**
-     * The picked date, or the stored text when it was not yyyy-MM-dd and no new date was picked.
-     */
-    private String dateFor(Event v) {
-        return datePicker.getValue() == null && parseDate(v.getDate()) == null ? v.getDate() : date();
-    }
-
-    /**
-     * Stored dates are free text; anything that is not yyyy-MM-dd leaves the picker empty.
-     */
-    private static LocalDate parseDate(String text) {
-        try {
-            return text == null ? null : LocalDate.parse(text);
-        } catch (DateTimeParseException ex) {
-            return null;
-        }
-    }
-
     @Override
     protected List<Event> load() {
         return controller.getAll();
@@ -63,7 +39,7 @@ public class EventView extends CrudView<Event> {
     @Override
     protected void fill(Event v) {
         nameF.setText(v.getName());
-        datePicker.setValue(parseDate(v.getDate()));
+        datePicker.setValue(v.getDate());
         locF.setText(v.getLocation());
         catF.setText(v.getCategory());
     }
@@ -78,12 +54,12 @@ public class EventView extends CrudView<Event> {
 
     @Override
     protected void add() {
-        controller.add(nameF.getText(), date(), locF.getText(), catF.getText());
+        controller.add(nameF.getText(), datePicker.getValue(), locF.getText(), catF.getText());
     }
 
     @Override
     protected void update(Event v) {
-        controller.update(v.getId(), nameF.getText(), dateFor(v), locF.getText(), catF.getText());
+        controller.update(v.getId(), nameF.getText(), datePicker.getValue(), locF.getText(), catF.getText());
     }
 
     @Override
