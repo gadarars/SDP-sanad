@@ -1,5 +1,6 @@
 package com.sanad;
 
+import atlantafx.base.theme.PrimerLight;
 import com.sanad.view.MainView;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -10,6 +11,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
+        Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
         stage.setTitle("Sanad - Non-Profit Management System");
         stage.setScene(new Scene(new MainView(), 1000, 560));
         stage.show();
