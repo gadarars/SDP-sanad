@@ -4,15 +4,25 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * MODEL: every kind of user, with the columns only that kind fills in.
+ * MODEL: every kind of user, with the factory that makes it and the columns only that kind fills in.
  */
 public enum UserType {
-    ADMIN("job_title"), STAFF("job_title"), DONOR("phone"), VOLUNTEER("skills"), BENEFICIARY("address");
+    ADMIN(new AdminFactory(), "job_title"),
+    STAFF(new StaffFactory(), "job_title"),
+    DONOR(new DonorFactory(), "phone"),
+    VOLUNTEER(new VolunteerFactory(), "skills"),
+    BENEFICIARY(new BeneficiaryFactory(), "address");
 
+    private final UserFactory factory;
     private final List<String> fields;
 
-    UserType(String... fields) {
+    UserType(UserFactory factory, String... fields) {
+        this.factory = factory;
         this.fields = List.of(fields);
+    }
+
+    public UserFactory getFactory() {
+        return factory;
     }
 
     public List<String> getFields() {

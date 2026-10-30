@@ -48,7 +48,8 @@ public class UserController {
 
     private static User validated(int id, String username, String email, UserType type, Map<String, String> details) {
         if (username == null || username.isBlank()) throw new IllegalArgumentException("Username is required");
-        return UserFactory.create(id, type, username.strip(), email == null ? null : email.strip(), details);   // FACTORY
+        if (type == null) throw new IllegalArgumentException("Role is required");
+        return type.getFactory().buildUser(id, username, email, details);   // FACTORY METHOD
     }
 
     private static String hashed(String password) {

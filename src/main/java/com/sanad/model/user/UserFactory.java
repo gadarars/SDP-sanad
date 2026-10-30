@@ -1,32 +1,28 @@
 package com.sanad.model.user;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
- * FACTORY PATTERN.
- * Turns a UserType into the matching User subclass; nothing else calls the subclass constructors.
+ * FACTORY METHOD PATTERN (Creator).
+ * buildUser() is the same for every type; each subclass decides which User class createUser() makes.
  */
-public class UserFactory {
-
-    private UserFactory() {
-    }
+public abstract class UserFactory {
 
     /**
      * {@code details} holds the type-specific fields by column name; columns of other types are ignored.
      */
-    public static User create(int id, UserType type, String username, String email, Map<String, String> details) {
-        if (type == null) throw new IllegalArgumentException("Role is required");
-        return switch (type) {
-            case ADMIN -> new AdminUser(id, username, email, field(details, "job_title"));
-            case STAFF -> new StaffUser(id, username, email, field(details, "job_title"));
-            case DONOR -> new DonorUser(id, username, email, field(details, "phone"));
-            case VOLUNTEER -> new VolunteerUser(id, username, email, field(details, "skills"));
-            case BENEFICIARY -> new BeneficiaryUser(id, username, email, field(details, "address"));
-        };
+    public User buildUser(int id, String username, String email, Map<String, String> details) {
+        Map<String, String> fields = new HashMap<>();
+        for (String column : UserType.allFields()) {
+            String value = details.get(column);
+            fields.put(column, value == null ? "" : value.strip());
+        }
+        return createUser(id, username.strip(), email == null ? null : email.strip(), fields);
     }
 
-    private static String field(Map<String, String> details, String column) {
-        String value = details.get(column);
-        return value == null ? "" : value.strip();
-    }
+    /**
+     * The factory method: {@code details} has every type-specific column, never null.
+     */
+    protected abstract User createUser(int id, String username, String email, Map<String, String> details);
 }

@@ -31,8 +31,9 @@ public class LoginController {
     private static void ensureDefaultAdmin(UserRepository repo) {
         if (repo.countWithPassword() > 0) return;
         String hash = PasswordHasher.hash("admin123");
+        UserFactory factory = UserType.ADMIN.getFactory();   // FACTORY METHOD
         repo.findByUsername("admin").ifPresentOrElse(
-                existing -> repo.update(UserFactory.create(existing.getId(), UserType.ADMIN, "admin", existing.getEmail(), Map.of()), hash),
-                () -> repo.add(UserFactory.create(0, UserType.ADMIN, "admin", "admin@sanad.org", Map.of()), hash));
+                existing -> repo.update(factory.buildUser(existing.getId(), "admin", existing.getEmail(), Map.of()), hash),
+                () -> repo.add(factory.buildUser(0, "admin", "admin@sanad.org", Map.of()), hash));
     }
 }
