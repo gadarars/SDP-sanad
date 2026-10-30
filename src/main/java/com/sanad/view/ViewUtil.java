@@ -2,7 +2,6 @@ package com.sanad.view;
 
 import atlantafx.base.theme.Styles;
 import atlantafx.base.theme.Tweaks;
-import javafx.collections.FXCollections;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
@@ -66,11 +65,21 @@ public class ViewUtil {
      */
     @SafeVarargs
     public static <T> ComboBox<T> choice(T... codes) {
-        ComboBox<T> box = new ComboBox<>(FXCollections.observableArrayList(codes));
+        ComboBox<T> box = picker(ViewUtil::pretty);
+        box.getItems().setAll(codes);
+        box.setValue(codes[0]);
+        return box;
+    }
+
+    /**
+     * Empty drop-down that displays its items through {@code label}.
+     */
+    public static <T> ComboBox<T> picker(Function<T, String> label) {
+        ComboBox<T> box = new ComboBox<>();
         box.setConverter(new StringConverter<>() {
             @Override
-            public String toString(T code) {
-                return code == null ? "" : pretty(code);
+            public String toString(T item) {
+                return item == null ? "" : label.apply(item);
             }
 
             @Override
@@ -78,7 +87,6 @@ public class ViewUtil {
                 return null; // only used by editable combo boxes
             }
         });
-        box.setValue(codes[0]);
         return box;
     }
 
