@@ -1,12 +1,12 @@
 package com.sanad.controller;
 
 import com.sanad.db.DatabaseConnection;
-import com.sanad.model.user.PasswordHasher;
-import com.sanad.model.user.User;
-import com.sanad.model.user.UserFactory;
-import com.sanad.model.user.UserRepository;
+import com.sanad.model.user.*;
+import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * CONTROLLER: validates input from the view and calls the repository.
@@ -19,51 +19,63 @@ public class UserController {
         return repo().findAll();
     }
 
-    public void add(String username, String email, String role, String password) {
-        check(username);
-        if (password == null || password.length() < MIN_PASSWORD)
-            throw new IllegalArgumentException("Password must be at least " + MIN_PASSWORD + " characters");
-        if (repo().findByUsername(username.trim()).isPresent())
-            throw new IllegalArgumentException("Username '" + username.trim() + "' is already taken");
-        repo().add(UserFactory.create(0, role, username.trim(), email), PasswordHasher.hash(password));   // FACTORY
+    /**
+     * {@code details} holds the type-specific fields by column name, e.g. {"phone": "..."}.
+     */
+    public void add(String username, String email, UserType type, String password, Map<String, String> details) {
+        User user = validated(0, username, email, type, details);
+        String hash = hashed(password);
+        unique(user, () -> repo().add(user, hash));
     }
 
     /**
      * Leave the password empty to keep the current one.
      */
-    public void update(int id, String username, String email, String role, String password) {
-        check(username);
-        repo().findByUsername(username.trim()).ifPresent(other -> {
-            if (other.getId() != id)
-                throw new IllegalArgumentException("Username '" + username.trim() + "' is already taken");
-        });
-        User user = UserFactory.create(id, role, username.trim(), email);                                  // FACTORY
-        if (password == null || password.isEmpty()) {
-            repo().update(user);
-        } else {
-            if (password.length() < MIN_PASSWORD)
-                throw new IllegalArgumentException("Password must be at least " + MIN_PASSWORD + " characters");
-            repo().updateWithPassword(user, PasswordHasher.hash(password));
-        }
+    public void update(int id, String username, String email, UserType type, String password, Map<String, String> details) {
+        User user = validated(id, username, email, type, details);
+        String hash = password == null || password.isEmpty() ? null : hashed(password);
+        if (type != UserType.ADMIN) keepAnAdmin(id);
+        unique(user, () -> repo().update(user, hash));
     }
 
     public void delete(int id) {
+        User me = Session.getInstance().getCurrentUser();
+        if (me != null && me.getId() == id)
+            throw new IllegalArgumentException("You can't delete the account you are logged in as");
+        keepAnAdmin(id);
         repo().delete(id);
     }
 
-    /**
-     * First run: if nobody has a password yet, create the admin so someone can log in.
-     */
-    public void ensureDefaultAdmin() {
-        if (repo().countWithPassword() > 0) return;
-        String hash = PasswordHasher.hash("admin123");
-        repo().findByUsername("admin").ifPresentOrElse(
-                existing -> repo().updateWithPassword(UserFactory.create(existing.getId(), "ADMIN", "admin", existing.getEmail()), hash),
-                () -> repo().add(UserFactory.create(0, "ADMIN", "admin", "admin@sanad.org"), hash));
+    private static User validated(int id, String username, String email, UserType type, Map<String, String> details) {
+        if (username == null || username.isBlank()) throw new IllegalArgumentException("Username is required");
+        return UserFactory.create(id, type, username.strip(), email == null ? null : email.strip(), details);   // FACTORY
     }
 
-    private void check(String username) {
-        if (username == null || username.isBlank()) throw new IllegalArgumentException("Username is required");
+    private static String hashed(String password) {
+        if (password == null || password.length() < MIN_PASSWORD)
+            throw new IllegalArgumentException("Password must be at least " + MIN_PASSWORD + " characters");
+        return PasswordHasher.hash(password);
+    }
+
+    /**
+     * Refuses to delete or demote the last admin who can log in.
+     */
+    private static void keepAnAdmin(int id) {
+        boolean isAdmin = repo().findById(id).map(u -> u.getType() == UserType.ADMIN).orElse(false);
+        if (isAdmin && repo().countOtherAdmins(id) == 0)
+            throw new IllegalArgumentException("At least one admin must remain");
+    }
+
+    /**
+     * Runs the write, reporting a username that is already taken as a validation error.
+     */
+    private static void unique(User u, Runnable write) {
+        try {
+            write.run();
+        } catch (UnableToExecuteStatementException e) {
+            if (!(e.getCause() instanceof SQLIntegrityConstraintViolationException)) throw e;
+            throw new IllegalArgumentException("Username '" + u.getUsername() + "' is already taken");
+        }
     }
 
     private static UserRepository repo() {

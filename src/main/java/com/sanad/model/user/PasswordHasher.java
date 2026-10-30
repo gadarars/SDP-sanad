@@ -7,12 +7,12 @@ import java.security.SecureRandom;
 import java.util.HexFormat;
 
 /**
- * Stores passwords as "salt:hash" (SHA-256), never as plain text.
- * Simple and fine for a course project (a real system would use bcrypt/argon2).
+ * Stores passwords as "salt:hash" (salted SHA-256), never as plain text.
  */
 public class PasswordHasher {
 
-    private PasswordHasher() { }
+    private PasswordHasher() {
+    }
 
     public static String hash(String password) {
         byte[] salt = new byte[16];

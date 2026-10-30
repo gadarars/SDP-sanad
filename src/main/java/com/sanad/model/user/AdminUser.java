@@ -1,12 +1,23 @@
 package com.sanad.model.user;
 
-import java.util.List;
+import java.util.EnumSet;
+import java.util.Set;
 
-/** MODEL: a ADMIN user. Created only through UserFactory. */
-public class AdminUser extends User {
-    public AdminUser(int id, String username, String email) { super(id, username, email); }
+/**
+ * MODEL: an ADMIN user, a staff member who can also manage users. Created only through UserFactory.
+ */
+public class AdminUser extends StaffUser {
+    AdminUser(int id, String username, String email, String jobTitle) {
+        super(id, username, email, jobTitle);
+    }
 
-    @Override public String getRole() { return "ADMIN"; }
-    @Override public String getPermissions() { return "Manage everything: users, donations, events, volunteers, beneficiaries"; }
-    @Override public List<String> getAllowedTabs() { return List.of("Donations", "Volunteers", "Events", "Beneficiaries", "Users", "Lookup tables"); }
+    @Override
+    public UserType getType() {
+        return UserType.ADMIN;
+    }
+
+    @Override
+    public Set<Feature> getFeatures() {
+        return EnumSet.allOf(Feature.class);
+    }
 }

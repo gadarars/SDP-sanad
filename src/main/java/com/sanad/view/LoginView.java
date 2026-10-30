@@ -2,7 +2,6 @@ package com.sanad.view;
 
 import atlantafx.base.theme.Styles;
 import com.sanad.controller.LoginController;
-import com.sanad.model.user.User;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -11,14 +10,12 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 
-import java.util.function.Consumer;
-
 /**
- * VIEW: the login screen. Calls onSuccess(user) when the login works.
+ * VIEW: the login screen. Runs onSuccess once the user is logged in.
  */
 public class LoginView extends VBox {
 
-    public LoginView(Consumer<User> onSuccess) {
+    public LoginView(Runnable onSuccess) {
         LoginController controller = new LoginController();
         setPadding(new Insets(32));
         setSpacing(12);
@@ -38,18 +35,17 @@ public class LoginView extends VBox {
         loginBtn.setMaxWidth(Double.MAX_VALUE);
         Label message = new Label();
         message.getStyleClass().add(Styles.DANGER);
-        Label hint = new Label("First run: admin / admin123");
-        hint.getStyleClass().add(Styles.TEXT_MUTED);
 
         loginBtn.setOnAction(e -> {
             try {
-                onSuccess.accept(controller.login(usernameF.getText(), passwordF.getText()));
+                controller.login(usernameF.getText(), passwordF.getText());
+                onSuccess.run();
             } catch (Exception ex) {
                 message.setText(ex.getMessage());
                 passwordF.clear();
             }
         });
 
-        getChildren().addAll(title, subtitle, usernameF, passwordF, loginBtn, message, hint);
+        getChildren().addAll(title, subtitle, usernameF, passwordF, loginBtn, message);
     }
 }

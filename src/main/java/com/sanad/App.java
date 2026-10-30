@@ -2,8 +2,6 @@ package com.sanad;
 
 import atlantafx.base.theme.PrimerLight;
 import com.sanad.controller.LoginController;
-import com.sanad.controller.UserController;
-import com.sanad.model.user.User;
 import com.sanad.view.LoginView;
 import com.sanad.view.MainView;
 import javafx.application.Application;
@@ -19,19 +17,18 @@ public class App extends Application {
     @Override
     public void start(Stage stage) {
         stage.setTitle("Sanad - Non-Profit Management System");
-        new UserController().ensureDefaultAdmin();   // makes sure someone can log in
         showLogin(stage);
         stage.show();
     }
 
     private void showLogin(Stage stage) {
         Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
-        stage.setScene(scene(new LoginView(user -> showMain(stage, user)), 420, 440));
+        stage.setScene(scene(new LoginView(() -> showMain(stage)), 420, 440));
         stage.centerOnScreen();
     }
 
-    private void showMain(Stage stage, User user) {
-        stage.setScene(scene(new MainView(user, () -> {
+    private void showMain(Stage stage) {
+        stage.setScene(scene(new MainView(() -> {
             new LoginController().logout();
             showLogin(stage);
         }), 1200, 720));

@@ -1,12 +1,35 @@
 package com.sanad.model.user;
 
-import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-/** MODEL: a BENEFICIARY user. Created only through UserFactory. */
+/**
+ * MODEL: a BENEFICIARY user. Created only through UserFactory.
+ */
 public class BeneficiaryUser extends User {
-    public BeneficiaryUser(int id, String username, String email) { super(id, username, email); }
+    private final String address;
 
-    @Override public String getRole() { return "BENEFICIARY"; }
-    @Override public String getPermissions() { return "View own services and requests"; }
-    @Override public List<String> getAllowedTabs() { return List.of("Beneficiaries"); }
+    BeneficiaryUser(int id, String username, String email, String address) {
+        super(id, username, email);
+        this.address = address;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    @Override
+    public UserType getType() {
+        return UserType.BENEFICIARY;
+    }
+
+    @Override
+    public Set<Feature> getFeatures() {
+        return Set.of(Feature.BENEFICIARIES);
+    }
+
+    @Override
+    public Map<String, String> getDetails() {
+        return Map.of("address", address);
+    }
 }

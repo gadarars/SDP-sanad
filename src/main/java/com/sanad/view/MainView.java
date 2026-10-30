@@ -4,9 +4,11 @@ import atlantafx.base.theme.PrimerDark;
 import atlantafx.base.theme.PrimerLight;
 import atlantafx.base.theme.Styles;
 import atlantafx.base.theme.Tweaks;
+import com.sanad.model.user.Feature;
+import com.sanad.model.user.Session;
+import com.sanad.model.user.User;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
-import com.sanad.model.user.User;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -25,25 +27,26 @@ import java.util.List;
  */
 public class MainView extends BorderPane {
 
-    private record Section(String title, Ikon icon, CrudView<?> view) {
+    private record Section(String title, Ikon icon, Feature feature, CrudView<?> view) {
     }
 
     private boolean dark;
 
     /**
-     * Shows only the sections the logged-in user's role is allowed to open.
+     * Shows only the sections the logged-in user's type is allowed to open.
      */
-    public MainView(User user, Runnable onLogout) {
+    public MainView(Runnable onLogout) {
+        User user = Session.getInstance().getCurrentUser();
         applyTheme();
         List<Section> sections = List.of(
-                new Section("Donations", Feather.GIFT, new DonationView()),
-                new Section("Volunteers", Feather.USERS, new VolunteerView()),
-                new Section("Events", Feather.CALENDAR, new EventView()),
-                new Section("Beneficiaries", Feather.HEART, new BeneficiaryView()),
-                new Section("Users", Feather.SHIELD, new UserView()),
-                new Section("Lookup tables", Feather.LIST, new LookupView()));
+                new Section("Donations", Feather.GIFT, Feature.DONATIONS, new DonationView()),
+                new Section("Volunteers", Feather.USERS, Feature.VOLUNTEERS, new VolunteerView()),
+                new Section("Events", Feather.CALENDAR, Feature.EVENTS, new EventView()),
+                new Section("Beneficiaries", Feather.HEART, Feature.BENEFICIARIES, new BeneficiaryView()),
+                new Section("Users", Feather.SHIELD, Feature.USERS, new UserView()),
+                new Section("Lookup tables", Feather.LIST, Feature.LOOKUPS, new LookupView()));
         ListView<Section> nav = new ListView<>(FXCollections.observableArrayList(
-                sections.stream().filter(s -> user.getAllowedTabs().contains(s.title())).toList()));
+                sections.stream().filter(s -> user.getFeatures().contains(s.feature())).toList()));
         nav.getStyleClass().add(Tweaks.EDGE_TO_EDGE);
         nav.setCellFactory(list -> new ListCell<>() {
             @Override

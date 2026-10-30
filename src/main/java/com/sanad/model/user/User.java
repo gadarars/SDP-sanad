@@ -1,11 +1,11 @@
 package com.sanad.model.user;
 
-import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * MODEL: the common parent of every user type.
- * Each role (Admin, Staff, Donor, Volunteer, Beneficiary) is a subclass that
- * answers three questions differently: getRole(), getPermissions() and getAllowedTabs().
+ * Each subclass adds its own fields and decides which features it may open.
  * Objects are created only through UserFactory.
  */
 public abstract class User {
@@ -31,18 +31,22 @@ public abstract class User {
         return email;
     }
 
+    public abstract UserType getType();
+
     /**
      * The role name stored in the database, e.g. "ADMIN".
      */
-    public abstract String getRole();
+    public String getRole() {
+        return getType().name();
+    }
 
     /**
-     * What this kind of user is allowed to do (shown in the table).
+     * Which features this kind of user may open after login.
      */
-    public abstract String getPermissions();
+    public abstract Set<Feature> getFeatures();
 
     /**
-     * Which sidebar sections this kind of user may open after login.
+     * This type's own fields keyed by column name, e.g. {"phone": "0100 123 4567"}.
      */
-    public abstract List<String> getAllowedTabs();
+    public abstract Map<String, String> getDetails();
 }

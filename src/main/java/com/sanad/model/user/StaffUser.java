@@ -1,12 +1,37 @@
 package com.sanad.model.user;
 
-import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-/** MODEL: a STAFF user. Created only through UserFactory. */
+import static com.sanad.model.user.Feature.*;
+
+/**
+ * MODEL: a STAFF user. Created only through UserFactory.
+ */
 public class StaffUser extends User {
-    public StaffUser(int id, String username, String email) { super(id, username, email); }
+    private final String jobTitle;
 
-    @Override public String getRole() { return "STAFF"; }
-    @Override public String getPermissions() { return "Manage donations, events, volunteers and beneficiaries"; }
-    @Override public List<String> getAllowedTabs() { return List.of("Donations", "Volunteers", "Events", "Beneficiaries", "Lookup tables"); }
+    StaffUser(int id, String username, String email, String jobTitle) {
+        super(id, username, email);
+        this.jobTitle = jobTitle;
+    }
+
+    public String getJobTitle() {
+        return jobTitle;
+    }
+
+    @Override
+    public UserType getType() {
+        return UserType.STAFF;
+    }
+
+    @Override
+    public Set<Feature> getFeatures() {
+        return Set.of(DONATIONS, VOLUNTEERS, EVENTS, BENEFICIARIES, LOOKUPS);
+    }
+
+    @Override
+    public Map<String, String> getDetails() {
+        return Map.of("job_title", jobTitle);
+    }
 }
