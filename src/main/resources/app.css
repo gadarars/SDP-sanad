@@ -1,0 +1,38 @@
+/* App-specific styles layered on top of the AtlantaFX theme. */
+
+.sidebar {
+    -fx-background-color: -color-bg-subtle;
+    -fx-border-color: -color-border-default;
+    -fx-border-width: 0 1 0 0;
+    -fx-padding: 20 12 16 12;
+    -fx-pref-width: 220;
+}
+
+.sidebar .brand {
+    -fx-padding: 0 12 8 12;
+}
+
+.sidebar .list-view,
+.sidebar .list-cell,
+.sidebar .list-cell:empty {
+    -fx-background-color: transparent;
+}
+
+.sidebar .list-cell {
+    -fx-padding: 8 12;
+    -fx-background-radius: 6;
+    -fx-graphic-text-gap: 10;
+}
+
+.sidebar .list-cell:filled:hover {
+    -fx-background-color: -color-bg-default;
+}
+
+.sidebar .list-cell:filled:selected {
+    -fx-background-color: -color-accent-subtle;
+    -fx-text-fill: -color-accent-fg;
+}
+
+.sidebar .list-cell:filled:selected .ikonli-font-icon {
+    -fx-icon-color: -color-accent-fg;
+}
