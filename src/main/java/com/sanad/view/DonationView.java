@@ -44,6 +44,7 @@ public class DonationView extends CrudView<Donation> {
     protected void clearForm() {
         donorF.clear();
         amountF.clear();
+        typeBox.getSelectionModel().selectFirst();
     }
 
     @Override

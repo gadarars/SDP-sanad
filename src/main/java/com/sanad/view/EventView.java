@@ -38,6 +38,13 @@ public class EventView extends CrudView<Event> {
     }
 
     /**
+     * The picked date, or the stored text when it was not yyyy-MM-dd and no new date was picked.
+     */
+    private String dateFor(Event v) {
+        return datePicker.getValue() == null && parseDate(v.getDate()) == null ? v.getDate() : date();
+    }
+
+    /**
      * Stored dates are free text; anything that is not yyyy-MM-dd leaves the picker empty.
      */
     private static LocalDate parseDate(String text) {
@@ -76,7 +83,7 @@ public class EventView extends CrudView<Event> {
 
     @Override
     protected void update(Event v) {
-        controller.update(v.getId(), nameF.getText(), date(), locF.getText(), catF.getText());
+        controller.update(v.getId(), nameF.getText(), dateFor(v), locF.getText(), catF.getText());
     }
 
     @Override

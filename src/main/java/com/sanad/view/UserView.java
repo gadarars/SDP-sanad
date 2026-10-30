@@ -12,13 +12,15 @@ import java.util.List;
  */
 public class UserView extends CrudView<User> {
 
+    private static final String DEFAULT_ROLE = "STAFF";
+
     private final UserController controller = new UserController();
     private final TextField usernameF = new TextField(), emailF = new TextField();
     private final ComboBox<String> roleBox = ViewUtil.choice("ADMIN", "STAFF", "DONOR", "VOLUNTEER", "BENEFICIARY");
 
     public UserView() {
         super("Users", "User");
-        roleBox.setValue("STAFF");
+        roleBox.setValue(DEFAULT_ROLE);
 
         table.getColumns().addAll(ViewUtil.<User>idCol(), ViewUtil.<User>col("Username", "username"),
                 ViewUtil.<User>col("Email", "email"), ViewUtil.<User>col("Role", "role", ViewUtil::pretty));
@@ -42,6 +44,7 @@ public class UserView extends CrudView<User> {
     protected void clearForm() {
         usernameF.clear();
         emailF.clear();
+        roleBox.setValue(DEFAULT_ROLE);
     }
 
     @Override

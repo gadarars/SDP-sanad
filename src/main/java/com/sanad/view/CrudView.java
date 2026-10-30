@@ -99,9 +99,13 @@ public abstract class CrudView<T> extends VBox {
     }
 
     void refresh() {
-        List<T> items = load();
-        table.setItems(FXCollections.observableArrayList(items));
-        count.setText(items.size() + (items.size() == 1 ? " record" : " records"));
+        try {
+            List<T> items = load();
+            table.setItems(FXCollections.observableArrayList(items));
+            count.setText(items.size() + (items.size() == 1 ? " record" : " records"));
+        } catch (RuntimeException ex) {
+            show(ex.getMessage(), true);
+        }
     }
 
     private T selected() {
