@@ -41,6 +41,8 @@ public class MainView extends BorderPane {
         List<Section> sections = List.of(
                 new Section("Donations", Feather.GIFT, Feature.DONATIONS, new DonationView()),
                 new Section("Volunteers", Feather.USERS, Feature.VOLUNTEERS, new VolunteerView()),
+                new Section("Assignments", Feather.CLIPBOARD, Feature.VOLUNTEERS, new AssignmentView()),
+                new Section("Volunteer hours", Feather.CLOCK, Feature.VOLUNTEERS, new HourLogView()),
                 new Section("Events", Feather.CALENDAR, Feature.EVENTS, new EventView()),
                 new Section("Beneficiaries", Feather.HEART, Feature.BENEFICIARIES, new BeneficiaryView()),
                 new Section("Users", Feather.SHIELD, Feature.USERS, new UserView()),

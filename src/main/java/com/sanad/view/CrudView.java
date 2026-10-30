@@ -17,6 +17,7 @@ import org.kordamp.ikonli.feather.Feather;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * VIEW: shared layout for a CRUD screen (heading, form card, buttons, status message, table).
@@ -27,6 +28,7 @@ public abstract class CrudView<T> extends VBox {
     protected final TableView<T> table = new TableView<>();
     private final String noun;
     private final Label count = new Label();
+    private final HBox footer = new HBox(8);
     private Message status;
 
     /**
@@ -94,8 +96,19 @@ public abstract class CrudView<T> extends VBox {
         row.setAlignment(Pos.BOTTOM_LEFT);
         Card card = new Card();
         card.setBody(row);
-        card.setFooter(new HBox(8, add, update, delete));
+        footer.getChildren().addAll(0, List.of(add, update, delete));
+        card.setFooter(footer);
         getChildren().add(1, card);
+    }
+
+    /**
+     * Adds a footer button that runs {@code action} on the selected row.
+     */
+    protected void action(String text, Ikon icon, Consumer<T> action, String okMessage) {
+        Button b = button(text, icon);
+        b.disableProperty().bind(table.getSelectionModel().selectedItemProperty().isNull());
+        b.setOnAction(e -> run(() -> action.accept(selected()), okMessage));
+        footer.getChildren().add(b);
     }
 
     void refresh() {
