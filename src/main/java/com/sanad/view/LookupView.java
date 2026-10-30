@@ -4,10 +4,16 @@ import com.sanad.controller.LookupController;
 import com.sanad.model.lookup.Lookup;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 
-/** VIEW: builds the Lookup tables screen. It only talks to the controller, never to the database. */
+/**
+ * VIEW: builds the Lookup tables screen. It only talks to the controller, never to the database.
+ */
 public class LookupView extends VBox {
 
     private final LookupController controller = new LookupController();
@@ -21,9 +27,9 @@ public class LookupView extends VBox {
         setPadding(new Insets(12));
         setSpacing(10);
 
-        table.getColumns().addAll(ViewUtil.<Lookup>col("ID", "id"), ViewUtil.<Lookup>col("Kind (e.g. DONATION_TYPE)", "kind"),
+        table.getColumns().addAll(ViewUtil.<Lookup>col("ID", "id"), ViewUtil.<Lookup>col("Kind (e.g. EVENT_CATEGORY)", "kind"),
                 ViewUtil.<Lookup>col("Value", "name"));
-        kindField.setPromptText("Kind (e.g. DONATION_TYPE)");
+        kindField.setPromptText("Kind (e.g. EVENT_CATEGORY)");
         nameField.setPromptText("Value");
 
         // clicking a row fills the form so you can edit it
@@ -41,12 +47,18 @@ public class LookupView extends VBox {
         addBtn.setOnAction(e -> run(() -> controller.add(kindField.getText(), nameField.getText()), "Added"));
         updateBtn.setOnAction(e -> {
             Lookup sel = table.getSelectionModel().getSelectedItem();
-            if (sel == null) { message.setText("Select a row first"); return; }
+            if (sel == null) {
+                message.setText("Select a row first");
+                return;
+            }
             run(() -> controller.update(sel.getId(), kindField.getText(), nameField.getText()), "Updated");
         });
         deleteBtn.setOnAction(e -> {
             Lookup sel = table.getSelectionModel().getSelectedItem();
-            if (sel == null) { message.setText("Select a row first"); return; }
+            if (sel == null) {
+                message.setText("Select a row first");
+                return;
+            }
             run(() -> controller.delete(sel.getId()), "Deleted");
         });
 
@@ -68,7 +80,7 @@ public class LookupView extends VBox {
         }
     }
 
-    private void refresh() {
+    void refresh() {
         table.setItems(FXCollections.observableArrayList(controller.getAll()));
     }
 }

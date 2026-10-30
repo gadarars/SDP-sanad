@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
@@ -24,6 +25,7 @@ public class DatabaseConnection {
             settings.load(in);
             connection = open();
             createTables();
+            seedLookups();
         } catch (IOException | SQLException e) {
             throw new RuntimeException("Cannot open database. Is MySQL running? (docker compose up -d)", e);
         }
@@ -63,12 +65,12 @@ public class DatabaseConnection {
                     amount DECIMAL(10,2) NOT NULL,
                     type VARCHAR(50) NOT NULL)""");
             st.execute("""
-                CREATE TABLE IF NOT EXISTS volunteers (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    name VARCHAR(255) NOT NULL,
-                    skills VARCHAR(255),
-                    availability VARCHAR(255),
-                    hours DECIMAL(8,2) DEFAULT 0)""");
+                    CREATE TABLE IF NOT EXISTS volunteers (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        name VARCHAR(255) NOT NULL,
+                        skills VARCHAR(255),
+                        availability VARCHAR(255),
+                        hours DECIMAL(8,2) DEFAULT 0)""");
             st.execute("""
                 CREATE TABLE IF NOT EXISTS events (
                     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -86,13 +88,29 @@ public class DatabaseConnection {
                 CREATE TABLE IF NOT EXISTS lookups (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     kind VARCHAR(50) NOT NULL,
-                    name VARCHAR(255))""");
+                    name VARCHAR(255) NOT NULL,
+                    UNIQUE (kind, name))""");
             st.execute("""
                 CREATE TABLE IF NOT EXISTS users (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     username VARCHAR(100) NOT NULL,
                     email VARCHAR(255),
                     role VARCHAR(20) NOT NULL)""");
+        }
+    }
+
+    /** Fills the lookups table with starting event categories, need types and volunteer skills when it is empty. */
+    private void seedLookups() throws SQLException {
+        try (Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM lookups")) {
+            rs.next();
+            if (rs.getInt(1) > 0) return;
+            st.executeUpdate("""
+                INSERT INTO lookups(kind, name) VALUES
+                    ('EVENT_CATEGORY', 'FUNDRAISER'), ('EVENT_CATEGORY', 'WORKSHOP'), ('EVENT_CATEGORY', 'OUTREACH'),
+                    ('NEED_TYPE', 'FOOD'), ('NEED_TYPE', 'MEDICAL'), ('NEED_TYPE', 'EDUCATION'), ('NEED_TYPE', 'SHELTER'),
+                    ('VOLUNTEER_SKILL', 'TEACHING'), ('VOLUNTEER_SKILL', 'FIRST_AID'),
+                    ('VOLUNTEER_SKILL', 'LOGISTICS'), ('VOLUNTEER_SKILL', 'FUNDRAISING')""");
         }
     }
 }
