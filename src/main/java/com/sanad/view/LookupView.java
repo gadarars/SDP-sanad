@@ -2,73 +2,79 @@ package com.sanad.view;
 
 import com.sanad.controller.LookupController;
 import com.sanad.model.lookup.Lookup;
-import javafx.collections.FXCollections;
-import javafx.geometry.Insets;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextField;
 
-/** VIEW: builds the Lookup tables screen. It only talks to the controller, never to the database. */
-public class LookupView extends VBox {
+import java.util.List;
+
+/**
+ * VIEW: builds the Lookup tables screen. It only talks to the controller, never to the database.
+ */
+public class LookupView extends CrudView<Lookup> {
 
     private final LookupController controller = new LookupController();
-    private final TableView<Lookup> table = new TableView<>();
-    private final Label message = new Label();
-
-    private final TextField kindField = new TextField();
+    private final ComboBox<String> kindBox = new ComboBox<>();
     private final TextField nameField = new TextField();
 
     public LookupView() {
-        setPadding(new Insets(12));
-        setSpacing(10);
+        super("Lookup tables", "Value");
+        kindBox.setEditable(true);
+        kindBox.setPromptText("e.g. EVENT_CATEGORY");
 
-        table.getColumns().addAll(ViewUtil.<Lookup>col("ID", "id"), ViewUtil.<Lookup>col("Kind (e.g. DONATION_TYPE)", "kind"),
+        table.getColumns().addAll(ViewUtil.<Lookup>idCol(), ViewUtil.<Lookup>col("Kind", "kind"),
                 ViewUtil.<Lookup>col("Value", "name"));
-        kindField.setPromptText("Kind (e.g. DONATION_TYPE)");
-        nameField.setPromptText("Value");
 
-        // clicking a row fills the form so you can edit it
-        table.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
-            if (sel != null) {
-                kindField.setText(sel.getKind());
-                nameField.setText(sel.getName());
-            }
-        });
-
-        Button addBtn = new Button("Add");
-        Button updateBtn = new Button("Update selected");
-        Button deleteBtn = new Button("Delete selected");
-
-        addBtn.setOnAction(e -> run(() -> controller.add(kindField.getText(), nameField.getText()), "Added"));
-        updateBtn.setOnAction(e -> {
-            Lookup sel = table.getSelectionModel().getSelectedItem();
-            if (sel == null) { message.setText("Select a row first"); return; }
-            run(() -> controller.update(sel.getId(), kindField.getText(), nameField.getText()), "Updated");
-        });
-        deleteBtn.setOnAction(e -> {
-            Lookup sel = table.getSelectionModel().getSelectedItem();
-            if (sel == null) { message.setText("Select a row first"); return; }
-            run(() -> controller.delete(sel.getId()), "Deleted");
-        });
-
-        HBox form = new HBox(8, kindField, nameField);
-        HBox buttons = new HBox(8, addBtn, updateBtn, deleteBtn);
-        getChildren().addAll(new Label("Lookup tables"), form, buttons, message, table);
-        refresh();
+        build(ViewUtil.field("Kind", kindBox), ViewUtil.field("Value", nameField));
     }
 
-    private void run(Runnable action, String okMessage) {
-        try {
-            action.run();
-            message.setText(okMessage);
-            kindField.clear();
-            nameField.clear();
-            refresh();
-        } catch (Exception ex) {
-            message.setText("Error: " + ex.getMessage());
-        }
+    /**
+     * Also offers every kind already in the table as a choice.
+     */
+    @Override
+    void refresh() {
+        super.refresh();
+        kindBox.getItems().setAll(table.getItems().stream().map(Lookup::getKind).distinct().sorted().toList());
     }
 
-    private void refresh() {
-        table.setItems(FXCollections.observableArrayList(controller.getAll()));
+    private String kind() {
+        return kindBox.getEditor().getText();
+    }
+
+    @Override
+    protected List<Lookup> load() {
+        return controller.getAll();
+    }
+
+    @Override
+    protected void fill(Lookup sel) {
+        kindBox.setValue(sel.getKind());
+        nameField.setText(sel.getName());
+    }
+
+    @Override
+    protected void clearForm() {
+        kindBox.setValue(null);
+        kindBox.getEditor().clear();
+        nameField.clear();
+    }
+
+    @Override
+    protected void add() {
+        controller.add(kind(), nameField.getText());
+    }
+
+    @Override
+    protected void update(Lookup sel) {
+        controller.update(sel.getId(), kind(), nameField.getText());
+    }
+
+    @Override
+    protected void delete(Lookup sel) {
+        controller.delete(sel.getId());
+    }
+
+    @Override
+    protected String describe(Lookup sel) {
+        return "\"" + sel.getName() + "\" from " + sel.getKind();
     }
 }

@@ -2,55 +2,97 @@ package com.sanad.view;
 
 import com.sanad.controller.EventController;
 import com.sanad.model.event.Event;
-import javafx.collections.FXCollections;
-import javafx.geometry.Insets;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.TextField;
+import javafx.util.converter.LocalDateStringConverter;
 
-/** VIEW: events screen (full CRUD). */
-public class EventView extends VBox {
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.List;
+
+/**
+ * VIEW: events screen (full CRUD).
+ */
+public class EventView extends CrudView<Event> {
 
     private final EventController controller = new EventController();
-    private final TableView<Event> table = new TableView<>();
-    private final TextField nameF = new TextField(), dateF = new TextField(),
-            locF = new TextField(), catF = new TextField();
-    private final Label message = new Label();
+    private final TextField nameF = new TextField(), locF = new TextField(), catF = new TextField();
+    private final DatePicker datePicker = new DatePicker();
 
     public EventView() {
-        setPadding(new Insets(12));
-        setSpacing(10);
-        nameF.setPromptText("Event name"); dateF.setPromptText("Date (2026-12-01)");
-        locF.setPromptText("Location"); catF.setPromptText("Category");
+        super("Events", "Event");
+        datePicker.setConverter(new LocalDateStringConverter(DateTimeFormatter.ISO_LOCAL_DATE, DateTimeFormatter.ISO_LOCAL_DATE));
+        datePicker.setPromptText("2026-12-01");
 
-        table.getColumns().addAll(ViewUtil.<Event>col("ID", "id"), ViewUtil.<Event>col("Name", "name"),
+        table.getColumns().addAll(ViewUtil.<Event>idCol(), ViewUtil.<Event>col("Name", "name"),
                 ViewUtil.<Event>col("Date", "date"), ViewUtil.<Event>col("Location", "location"),
                 ViewUtil.<Event>col("Category", "category"));
-        table.getSelectionModel().selectedItemProperty().addListener((o, old, v) -> {
-            if (v != null) { nameF.setText(v.getName()); dateF.setText(v.getDate());
-                locF.setText(v.getLocation()); catF.setText(v.getCategory()); }
-        });
 
-        Button add = new Button("Add"), update = new Button("Update"), delete = new Button("Delete");
-        add.setOnAction(e -> run(() -> controller.add(nameF.getText(), dateF.getText(), locF.getText(), catF.getText()), "Event added"));
-        update.setOnAction(e -> {
-            Event s = table.getSelectionModel().getSelectedItem();
-            if (s == null) { message.setText("Select a row first"); return; }
-            run(() -> controller.update(s.getId(), nameF.getText(), dateF.getText(), locF.getText(), catF.getText()), "Event updated");
-        });
-        delete.setOnAction(e -> {
-            Event s = table.getSelectionModel().getSelectedItem();
-            if (s == null) { message.setText("Select a row first"); return; }
-            run(() -> controller.delete(s.getId()), "Event deleted");
-        });
-
-        getChildren().addAll(new Label("Events"), new HBox(8, nameF, dateF, locF, catF, add, update, delete), message, table);
-        refresh();
+        build(ViewUtil.field("Event name", nameF), ViewUtil.field("Date", datePicker),
+                ViewUtil.field("Location", locF), ViewUtil.field("Category", catF));
     }
 
-    private void run(Runnable action, String ok) {
-        try { action.run(); message.setText(ok); nameF.clear(); dateF.clear(); locF.clear(); catF.clear(); refresh(); }
-        catch (Exception ex) { message.setText("Error: " + ex.getMessage()); }
+    private String date() {
+        return datePicker.getValue() == null ? "" : datePicker.getValue().toString();
     }
 
-    private void refresh() { table.setItems(FXCollections.observableArrayList(controller.getAll())); }
+    /**
+     * The picked date, or the stored text when it was not yyyy-MM-dd and no new date was picked.
+     */
+    private String dateFor(Event v) {
+        return datePicker.getValue() == null && parseDate(v.getDate()) == null ? v.getDate() : date();
+    }
+
+    /**
+     * Stored dates are free text; anything that is not yyyy-MM-dd leaves the picker empty.
+     */
+    private static LocalDate parseDate(String text) {
+        try {
+            return text == null ? null : LocalDate.parse(text);
+        } catch (DateTimeParseException ex) {
+            return null;
+        }
+    }
+
+    @Override
+    protected List<Event> load() {
+        return controller.getAll();
+    }
+
+    @Override
+    protected void fill(Event v) {
+        nameF.setText(v.getName());
+        datePicker.setValue(parseDate(v.getDate()));
+        locF.setText(v.getLocation());
+        catF.setText(v.getCategory());
+    }
+
+    @Override
+    protected void clearForm() {
+        nameF.clear();
+        datePicker.setValue(null);
+        locF.clear();
+        catF.clear();
+    }
+
+    @Override
+    protected void add() {
+        controller.add(nameF.getText(), date(), locF.getText(), catF.getText());
+    }
+
+    @Override
+    protected void update(Event v) {
+        controller.update(v.getId(), nameF.getText(), dateFor(v), locF.getText(), catF.getText());
+    }
+
+    @Override
+    protected void delete(Event v) {
+        controller.delete(v.getId());
+    }
+
+    @Override
+    protected String describe(Event v) {
+        return "event " + v.getName();
+    }
 }

@@ -2,56 +2,68 @@ package com.sanad.view;
 
 import com.sanad.controller.DonationController;
 import com.sanad.model.donation.Donation;
-import javafx.collections.FXCollections;
-import javafx.geometry.Insets;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextField;
 
-/** VIEW: only builds the screen. It never touches the database directly. */
-public class DonationView extends VBox {
+import java.util.List;
+
+/**
+ * VIEW: donations screen (full CRUD).
+ */
+public class DonationView extends CrudView<Donation> {
 
     private final DonationController controller = new DonationController();
-    private final TableView<Donation> table = new TableView<>();
     private final TextField donorF = new TextField();
     private final TextField amountF = new TextField();
-    private final ComboBox<String> typeBox =
-            new ComboBox<>(FXCollections.observableArrayList("ONLINE", "CHECK", "IN_KIND"));
-    private final Label message = new Label();
+    private final ComboBox<String> typeBox = ViewUtil.choice("ONLINE", "CHECK", "IN_KIND");
 
     public DonationView() {
-        setPadding(new Insets(12));
-        setSpacing(10);
-        donorF.setPromptText("Donor name");
-        amountF.setPromptText("Amount");
-        typeBox.setValue("ONLINE");
+        super("Donations", "Donation");
+        amountF.setPromptText("0.00");
 
-        table.getColumns().addAll(ViewUtil.<Donation>col("ID", "id"), ViewUtil.<Donation>col("Donor", "donorName"),
-                ViewUtil.<Donation>col("Amount", "amount"), ViewUtil.<Donation>col("Type", "type"));
-        table.getSelectionModel().selectedItemProperty().addListener((o, old, d) -> {
-            if (d != null) { donorF.setText(d.getDonorName()); amountF.setText(String.valueOf(d.getAmount())); typeBox.setValue(d.getType()); }
-        });
+        table.getColumns().addAll(ViewUtil.<Donation>idCol(), ViewUtil.<Donation>col("Donor", "donorName"),
+                ViewUtil.<Donation>numberCol("Amount", "amount", "EGP %,.2f"),
+                ViewUtil.<Donation>col("Type", "type", ViewUtil::pretty));
 
-        Button add = new Button("Add"), update = new Button("Update"), delete = new Button("Delete");
-        add.setOnAction(e -> run(() -> controller.add(donorF.getText(), Double.parseDouble(amountF.getText()), typeBox.getValue()), "Donation added"));
-        update.setOnAction(e -> {
-            Donation s = table.getSelectionModel().getSelectedItem();
-            if (s == null) { message.setText("Select a row first"); return; }
-            run(() -> controller.update(s.getId(), donorF.getText(), Double.parseDouble(amountF.getText()), typeBox.getValue()), "Donation updated");
-        });
-        delete.setOnAction(e -> {
-            Donation s = table.getSelectionModel().getSelectedItem();
-            if (s == null) { message.setText("Select a row first"); return; }
-            run(() -> controller.delete(s.getId()), "Donation deleted");
-        });
-
-        getChildren().addAll(new Label("Donations"), new HBox(8, donorF, amountF, typeBox, add, update, delete), message, table);
-        refresh();
+        build(ViewUtil.field("Donor name", donorF), ViewUtil.field("Amount (EGP)", amountF), ViewUtil.field("Type", typeBox));
     }
 
-    private void run(Runnable action, String okMessage) {
-        try { action.run(); message.setText(okMessage); donorF.clear(); amountF.clear(); refresh(); }
-        catch (Exception ex) { message.setText("Error: " + ex.getMessage()); }
+    @Override
+    protected List<Donation> load() {
+        return controller.getAll();
     }
 
-    private void refresh() { table.setItems(FXCollections.observableArrayList(controller.getAll())); }
+    @Override
+    protected void fill(Donation d) {
+        donorF.setText(d.getDonorName());
+        amountF.setText(ViewUtil.plain(d.getAmount()));
+        typeBox.setValue(d.getType());
+    }
+
+    @Override
+    protected void clearForm() {
+        donorF.clear();
+        amountF.clear();
+        typeBox.getSelectionModel().selectFirst();
+    }
+
+    @Override
+    protected void add() {
+        controller.add(donorF.getText(), ViewUtil.number(amountF, "Amount"), typeBox.getValue());
+    }
+
+    @Override
+    protected void update(Donation d) {
+        controller.update(d.getId(), donorF.getText(), ViewUtil.number(amountF, "Amount"), typeBox.getValue());
+    }
+
+    @Override
+    protected void delete(Donation d) {
+        controller.delete(d.getId());
+    }
+
+    @Override
+    protected String describe(Donation d) {
+        return "the donation from " + d.getDonorName();
+    }
 }

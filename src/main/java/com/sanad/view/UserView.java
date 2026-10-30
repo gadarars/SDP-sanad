@@ -2,53 +2,68 @@ package com.sanad.view;
 
 import com.sanad.controller.UserController;
 import com.sanad.model.user.User;
-import javafx.collections.FXCollections;
-import javafx.geometry.Insets;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextField;
 
-/** VIEW: user control panel (full CRUD for users). */
-public class UserView extends VBox {
+import java.util.List;
+
+/**
+ * VIEW: user control panel (full CRUD for users).
+ */
+public class UserView extends CrudView<User> {
+
+    private static final String DEFAULT_ROLE = "STAFF";
 
     private final UserController controller = new UserController();
-    private final TableView<User> table = new TableView<>();
     private final TextField usernameF = new TextField(), emailF = new TextField();
-    private final ComboBox<String> roleBox = new ComboBox<>(
-            FXCollections.observableArrayList("ADMIN", "STAFF", "DONOR", "VOLUNTEER", "BENEFICIARY"));
-    private final Label message = new Label();
+    private final ComboBox<String> roleBox = ViewUtil.choice("ADMIN", "STAFF", "DONOR", "VOLUNTEER", "BENEFICIARY");
 
     public UserView() {
-        setPadding(new Insets(12));
-        setSpacing(10);
-        usernameF.setPromptText("Username"); emailF.setPromptText("Email"); roleBox.setValue("STAFF");
+        super("Users", "User");
+        roleBox.setValue(DEFAULT_ROLE);
 
-        table.getColumns().addAll(ViewUtil.<User>col("ID", "id"), ViewUtil.<User>col("Username", "username"),
-                ViewUtil.<User>col("Email", "email"), ViewUtil.<User>col("Role", "role"));
-        table.getSelectionModel().selectedItemProperty().addListener((o, old, v) -> {
-            if (v != null) { usernameF.setText(v.getUsername()); emailF.setText(v.getEmail()); roleBox.setValue(v.getRole()); }
-        });
+        table.getColumns().addAll(ViewUtil.<User>idCol(), ViewUtil.<User>col("Username", "username"),
+                ViewUtil.<User>col("Email", "email"), ViewUtil.<User>col("Role", "role", ViewUtil::pretty));
 
-        Button add = new Button("Add"), update = new Button("Update"), delete = new Button("Delete");
-        add.setOnAction(e -> run(() -> controller.add(usernameF.getText(), emailF.getText(), roleBox.getValue()), "User added"));
-        update.setOnAction(e -> {
-            User s = table.getSelectionModel().getSelectedItem();
-            if (s == null) { message.setText("Select a row first"); return; }
-            run(() -> controller.update(s.getId(), usernameF.getText(), emailF.getText(), roleBox.getValue()), "User updated");
-        });
-        delete.setOnAction(e -> {
-            User s = table.getSelectionModel().getSelectedItem();
-            if (s == null) { message.setText("Select a row first"); return; }
-            run(() -> controller.delete(s.getId()), "User deleted");
-        });
-
-        getChildren().addAll(new Label("User control panel"), new HBox(8, usernameF, emailF, roleBox, add, update, delete), message, table);
-        refresh();
+        build(ViewUtil.field("Username", usernameF), ViewUtil.field("Email", emailF), ViewUtil.field("Role", roleBox));
     }
 
-    private void run(Runnable action, String ok) {
-        try { action.run(); message.setText(ok); usernameF.clear(); emailF.clear(); refresh(); }
-        catch (Exception ex) { message.setText("Error: " + ex.getMessage()); }
+    @Override
+    protected List<User> load() {
+        return controller.getAll();
     }
 
-    private void refresh() { table.setItems(FXCollections.observableArrayList(controller.getAll())); }
+    @Override
+    protected void fill(User v) {
+        usernameF.setText(v.getUsername());
+        emailF.setText(v.getEmail());
+        roleBox.setValue(v.getRole());
+    }
+
+    @Override
+    protected void clearForm() {
+        usernameF.clear();
+        emailF.clear();
+        roleBox.setValue(DEFAULT_ROLE);
+    }
+
+    @Override
+    protected void add() {
+        controller.add(usernameF.getText(), emailF.getText(), roleBox.getValue());
+    }
+
+    @Override
+    protected void update(User v) {
+        controller.update(v.getId(), usernameF.getText(), emailF.getText(), roleBox.getValue());
+    }
+
+    @Override
+    protected void delete(User v) {
+        controller.delete(v.getId());
+    }
+
+    @Override
+    protected String describe(User v) {
+        return "user " + v.getUsername();
+    }
 }
