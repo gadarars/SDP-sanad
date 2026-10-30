@@ -13,13 +13,13 @@ import java.util.List;
 @RegisterConstructorMapper(Beneficiary.class)
 public interface BeneficiaryRepository {
 
-    @SqlUpdate("INSERT INTO beneficiaries(name, need, contact) VALUES(:name, :need, :contact)")
+    @SqlUpdate("INSERT INTO beneficiaries(name, need, contact, user_id) VALUES(:name, :need, :contact, :userId)")
     void add(@BindBean Beneficiary b);
 
     @SqlQuery("SELECT * FROM beneficiaries ORDER BY id")
     List<Beneficiary> findAll();
 
-    @SqlUpdate("UPDATE beneficiaries SET name=:name, need=:need, contact=:contact WHERE id=:id")
+    @SqlUpdate("UPDATE beneficiaries SET name=:name, need=:need, contact=:contact, user_id=:userId WHERE id=:id")
     void update(@BindBean Beneficiary b);
 
     @SqlUpdate("DELETE FROM beneficiaries WHERE id=:id")
