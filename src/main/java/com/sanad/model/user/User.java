@@ -1,6 +1,8 @@
 package com.sanad.model.user;
 
-/** MODEL: a system user with a role (ADMIN, STAFF, DONOR, VOLUNTEER, BENEFICIARY). */
+/**
+ * MODEL: a system user with a role (ADMIN, STAFF, DONOR, VOLUNTEER, BENEFICIARY).
+ */
 public class User {
     private int id;
     private String username;
@@ -8,10 +10,25 @@ public class User {
     private String role;
 
     public User(int id, String username, String email, String role) {
-        this.id = id; this.username = username; this.email = email; this.role = role;
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.role = role;
     }
-    public int getId() { return id; }
-    public String getUsername() { return username; }
-    public String getEmail() { return email; }
-    public String getRole() { return role; }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getRole() {
+        return role;
+    }
 }
