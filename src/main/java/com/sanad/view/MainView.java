@@ -44,6 +44,7 @@ public class MainView extends BorderPane {
                 new Section("Assignments", Feather.CLIPBOARD, Feature.VOLUNTEERS, new AssignmentView()),
                 new Section("Volunteer hours", Feather.CLOCK, Feature.VOLUNTEERS, new HourLogView()),
                 new Section("Events", Feather.CALENDAR, Feature.EVENTS, new EventView()),
+                new Section("Registrations", Feather.USER_CHECK, Feature.EVENTS, new RegistrationView()),
                 new Section("Beneficiaries", Feather.HEART, Feature.BENEFICIARIES, new BeneficiaryView()),
                 new Section("Users", Feather.SHIELD, Feature.USERS, new UserView()),
                 new Section("Lookup tables", Feather.LIST, Feature.LOOKUPS, new LookupView()),
