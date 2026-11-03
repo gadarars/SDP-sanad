@@ -22,7 +22,8 @@ public interface RegistrationRepository {
     @SqlQuery(SELECT + "WHERE r.event_id = :eventId ORDER BY u.username")
     List<Registration> findByEvent(int eventId);
 
-    @SqlUpdate("UPDATE event_registrations SET event_id=:eventId, user_id=:userId WHERE id=:id")
+    /** Attendance is cleared when the registration moves to another event or user. */
+    @SqlUpdate("UPDATE event_registrations SET attended = (attended AND event_id = :eventId AND user_id = :userId), event_id=:eventId, user_id=:userId WHERE id=:id")
     void update(@BindBean Registration r);
 
     @SqlUpdate("UPDATE event_registrations SET attended = TRUE WHERE id=:id")
