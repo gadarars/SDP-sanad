@@ -3,6 +3,7 @@ package com.sanad.model.event;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * MODEL: an event (fundraiser, workshop, outreach...).
@@ -14,6 +15,7 @@ public class Event implements Subject {
     private LocalDate date;
     private String location;
     private String category;
+    private boolean cancelled;
     private final List<Observer> observers = new ArrayList<>();
 
     public Event(int id, String name, LocalDate date, String location, String category) {
@@ -55,7 +57,29 @@ public class Event implements Subject {
     }
 
     @Override
-    public void notifyObservers(String message) {
-        for (Observer o : observers) o.update(message);
+    public void notifyObservers() {
+        for (Observer o : observers) o.update(name, date, location, cancelled);
+    }
+
+    public void detailsChanged() {
+        notifyObservers();
+    }
+
+    /**
+     * Attendees hear about a change only when the name, date or location changed.
+     */
+    public void setDetails(String name, LocalDate date, String location, String category) {
+        boolean changed = !Objects.equals(this.name, name) || !Objects.equals(this.date, date)
+                || !Objects.equals(this.location, location);
+        this.name = name;
+        this.date = date;
+        this.location = location;
+        this.category = category;
+        if (changed) detailsChanged();
+    }
+
+    public void cancel() {
+        cancelled = true;
+        detailsChanged();
     }
 }

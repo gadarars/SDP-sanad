@@ -2,12 +2,11 @@ package com.sanad.view;
 
 import atlantafx.base.theme.Styles;
 import com.sanad.controller.DonationController;
+import com.sanad.model.donation.AddOn;
 import com.sanad.model.donation.Donation;
 import com.sanad.model.donation.DonationComponent;
 import com.sanad.model.donation.DonationMethod;
 import com.sanad.model.donation.DonationMethods;
-import com.sanad.model.donation.GiftWrappingDecorator;
-import com.sanad.model.donation.ThankYouCardDecorator;
 import com.sanad.model.user.User;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
@@ -15,6 +14,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import org.kordamp.ikonli.feather.Feather;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -30,10 +30,7 @@ public class DonationView extends CrudView<Donation> {
     private final TextField donorF = new TextField();
     private final TextField amountF = new TextField();
     private final ComboBox<DonationMethod> methodBox = ViewUtil.picker(DonationMethod::getLabel);
-    private final CheckBox giftWrapCb =
-            new CheckBox("Gift wrapping (+" + ViewUtil.plain(GiftWrappingDecorator.COST) + ")");
-    private final CheckBox thankYouCb =
-            new CheckBox("Thank-you card (+" + ViewUtil.plain(ThankYouCardDecorator.COST) + ")");
+    private final List<AddOn> addOns = new ArrayList<>();
     private final Label previewLabel = new Label();
 
     public DonationView() {
@@ -41,10 +38,12 @@ public class DonationView extends CrudView<Donation> {
         amountF.setPromptText("0.00");
         donorBox.setPromptText("None");
         previewLabel.getStyleClass().add(Styles.TEXT_MUTED);
+        previewLabel.setWrapText(true);
 
         methodBox.getItems().setAll(DonationMethods.all());
         methodBox.getSelectionModel().selectFirst();
 
+        donorBox.setDisable(!controller.choosesDonor());
         donorF.disableProperty().bind(donorBox.valueProperty().isNotNull());
         donorBox.valueProperty().addListener((o, old, u) -> {
             if (u != null) {
@@ -53,8 +52,6 @@ public class DonationView extends CrudView<Donation> {
         });
 
         amountF.textProperty().addListener((o, old, text) -> updatePreview());
-        giftWrapCb.selectedProperty().addListener((o, old, val) -> updatePreview());
-        thankYouCb.selectedProperty().addListener((o, old, val) -> updatePreview());
         updatePreview();
 
         table.getColumns().addAll(
@@ -64,10 +61,27 @@ public class DonationView extends CrudView<Donation> {
                 ViewUtil.<Donation>col("Method", "method", ViewUtil::pretty)
         );
 
+        HBox addOnButtons = new HBox(8);
+        for (AddOn addOn : AddOn.values()) {
+            Button b = new Button(addOn.getLabel() + " (+" + ViewUtil.plain(addOn.getCost()) + ")", new FontIcon(Feather.PLUS));
+            b.setOnAction(e -> {
+                addOns.add(addOn);
+                updatePreview();
+            });
+            addOnButtons.getChildren().add(b);
+        }
+        Button clear = new Button("Clear", new FontIcon(Feather.X));
+        clear.getStyleClass().add(Styles.FLAT);
+        clear.setOnAction(e -> {
+            addOns.clear();
+            updatePreview();
+        });
+        addOnButtons.getChildren().add(clear);
+
         Label addOnLabel = new Label("Add-ons");
         addOnLabel.getStyleClass().add(Styles.TEXT_MUTED);
-        VBox addOnsBox = new VBox(6, addOnLabel, new HBox(8, giftWrapCb, thankYouCb), previewLabel);
-        addOnsBox.setPrefWidth(240);
+        VBox addOnsBox = new VBox(6, addOnLabel, addOnButtons, previewLabel);
+        addOnsBox.setPrefWidth(320);
         HBox.setHgrow(addOnsBox, Priority.ALWAYS);
 
         build(
@@ -85,9 +99,10 @@ public class DonationView extends CrudView<Donation> {
     @Override
     protected List<Donation> load() {
         List<User> donors = new ArrayList<>();
-        donors.add(null);
+        if (controller.choosesDonor()) donors.add(null);
         donors.addAll(controller.getDonors());
         donorBox.getItems().setAll(donors);
+        if (!controller.choosesDonor()) donorBox.setValue(donors.get(0));
         return controller.getAll();
     }
 
@@ -99,30 +114,30 @@ public class DonationView extends CrudView<Donation> {
         donorF.setText(d.getDonorName());
         amountF.setText(ViewUtil.plain(d.getAmount()));
         methodBox.setValue(d.getDonationMethod());
-        giftWrapCb.setSelected(d.isGiftWrapping());
-        thankYouCb.setSelected(d.isThankYouCard());
+        addOns.clear();
+        addOns.addAll(d.getAddOns());
+        updatePreview();
     }
 
     @Override
     protected void clearForm() {
-        donorBox.setValue(null);
-        donorF.clear();
+        if (controller.choosesDonor()) donorBox.setValue(null);
+        donorF.setText(controller.choosesDonor() ? "" : donorBox.getValue().getUsername());
         amountF.clear();
         methodBox.getSelectionModel().selectFirst();
-        giftWrapCb.setSelected(false);
-        thankYouCb.setSelected(false);
+        addOns.clear();
+        updatePreview();
     }
 
     @Override
     protected void add() {
-        controller.add(donorId(), donorF.getText(), ViewUtil.number(amountF, "Amount"), methodBox.getValue(),
-                giftWrapCb.isSelected(), thankYouCb.isSelected());
+        controller.add(donorId(), donorF.getText(), ViewUtil.number(amountF, "Amount"), methodBox.getValue(), addOns);
     }
 
     @Override
     protected void update(Donation d) {
         controller.update(d.getId(), donorId(), donorF.getText(), ViewUtil.number(amountF, "Amount"),
-                methodBox.getValue(), giftWrapCb.isSelected(), thankYouCb.isSelected());
+                methodBox.getValue(), addOns);
     }
 
     @Override
@@ -143,7 +158,7 @@ public class DonationView extends CrudView<Donation> {
         try {
             String text = amountF.getText().strip();
             BigDecimal amount = text.isEmpty() ? BigDecimal.ZERO : new BigDecimal(text);
-            DonationComponent donation = controller.decorate(amount, giftWrapCb.isSelected(), thankYouCb.isSelected());
+            DonationComponent donation = controller.preview(amount, addOns);
             previewLabel.setText(donation.getDescription() + " — EGP " + String.format("%,.2f", donation.cost()));
         } catch (NumberFormatException ex) {
             previewLabel.setText("Invalid amount");
@@ -152,7 +167,7 @@ public class DonationView extends CrudView<Donation> {
 
     private void showHistory(Donation d) {
         List<Donation> history = controller.getHistory(d);
-        BigDecimal total = history.stream().map(Donation::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal total = controller.total(history);
 
         TableView<Donation> historyTable = new TableView<>();
         historyTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
@@ -165,7 +180,7 @@ public class DonationView extends CrudView<Donation> {
         historyTable.getItems().setAll(history);
         historyTable.setPrefHeight(260);
 
-        Label summary = new Label("Total: EGP " + String.format("%,.2f", total) + " (" + history.size() + " records)");
+        Label summary = new Label("Total with add-ons: EGP " + String.format("%,.2f", total) + " (" + history.size() + " records)");
         summary.getStyleClass().add(Styles.TEXT_BOLD);
 
         VBox content = new VBox(12, summary, historyTable);

@@ -19,11 +19,16 @@ public class DonorUser extends User {
 
     @Override
     public Set<Feature> getFeatures() {
-        return Set.of(Feature.DONATIONS);
+        return Set.of(Feature.DONATIONS, Feature.USERS);
     }
 
     @Override
     public Map<String, String> getDetails() {
         return Map.of();
+    }
+
+    @Override
+    public boolean managesAllRecords() {
+        return false;
     }
 }

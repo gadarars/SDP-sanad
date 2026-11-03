@@ -1,5 +1,6 @@
 package com.sanad.controller;
 
+import com.sanad.auth.Session;
 import com.sanad.db.DatabaseConnection;
 import com.sanad.model.event.Event;
 import com.sanad.model.volunteer.Assignment;
@@ -12,13 +13,23 @@ import java.sql.SQLException;
 import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /** CONTROLLER: validates input from the view and calls the repository. */
 public class AssignmentController {
 
     private static final int DUPLICATE_KEY = 1062;
 
-    public List<Assignment> getAll() { return repo().findAll(); }
+    /** Staff see every assignment; a volunteer sees only their own. */
+    public List<Assignment> getAll() {
+        if (Session.getInstance().managesAllRecords()) return repo().findAll();
+        Set<Integer> mine = volunteers().findAll().stream()
+                .filter(v -> Session.getInstance().canSee(v.getUserId())).map(Volunteer::getId).collect(Collectors.toSet());
+        return repo().findAll().stream().filter(a -> mine.contains(a.getVolunteerId())).toList();
+    }
+
+    public boolean canEdit() { return Session.getInstance().managesAllRecords(); }
 
     public List<Volunteer> suitableVolunteers(Event event, String skill) {
         if (event == null || event.getDate() == null || skill == null) return List.of();
@@ -40,9 +51,13 @@ public class AssignmentController {
         unique(volunteer, event, () -> repo().update(a));
     }
 
-    public void delete(int id) { repo().delete(id); }
+    public void delete(int id) {
+        Session.getInstance().requireManager();
+        repo().delete(id);
+    }
 
     private static Assignment validated(int id, Volunteer volunteer, Event event, String skill) {
+        Session.getInstance().requireManager();
         if (volunteer == null) throw new IllegalArgumentException("Volunteer is required");
         if (event == null) throw new IllegalArgumentException("Event is required");
         if (skill == null) throw new IllegalArgumentException("Skill is required");

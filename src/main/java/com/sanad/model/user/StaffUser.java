@@ -27,11 +27,16 @@ public class StaffUser extends User {
 
     @Override
     public Set<Feature> getFeatures() {
-        return Set.of(DONATIONS, VOLUNTEERS, EVENTS, BENEFICIARIES, LOOKUPS, NOTIFICATIONS);
+        return Set.of(DONATIONS, VOLUNTEERS, EVENTS, BENEFICIARIES, USERS, LOOKUPS, NOTIFICATIONS);
     }
 
     @Override
     public Map<String, String> getDetails() {
         return Map.of("job_title", jobTitle);
+    }
+
+    @Override
+    public boolean managesAllRecords() {
+        return true;
     }
 }

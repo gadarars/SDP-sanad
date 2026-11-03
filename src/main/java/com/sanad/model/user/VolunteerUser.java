@@ -25,11 +25,16 @@ public class VolunteerUser extends User {
 
     @Override
     public Set<Feature> getFeatures() {
-        return Set.of(Feature.VOLUNTEERS, Feature.EVENTS);
+        return Set.of(Feature.VOLUNTEERS, Feature.EVENTS, Feature.USERS);
     }
 
     @Override
     public Map<String, String> getDetails() {
         return Map.of("skills", skills);
+    }
+
+    @Override
+    public boolean managesAllRecords() {
+        return false;
     }
 }

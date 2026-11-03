@@ -38,6 +38,7 @@ public class AssignmentView extends CrudView<Assignment> {
 
         build(ViewUtil.field("Event", eventBox), ViewUtil.field("Skill", skillBox),
                 ViewUtil.field("Volunteer", volunteerBox), ViewUtil.field("Suitable volunteers", suitable));
+        if (!controller.canEdit()) readOnly();
     }
 
     @Override

@@ -51,6 +51,10 @@ public class UserView extends CrudView<User> {
             fields.add(box);
         }
         build(fields.toArray(Node[]::new));
+        if (!controller.isAdmin()) {
+            updateOnly();
+            roleBox.setDisable(true);
+        }
     }
 
     @Override

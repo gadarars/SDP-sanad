@@ -1,5 +1,6 @@
 package com.sanad.controller;
 
+import com.sanad.auth.Session;
 import com.sanad.db.DatabaseConnection;
 import com.sanad.model.user.User;
 import com.sanad.model.user.UserRepository;
@@ -29,9 +30,14 @@ public class VolunteerController {
 
     private final LookupController lookups = new LookupController();
 
-    public List<Volunteer> getAll() { return repo().findAll(); }
+    /** Staff see every volunteer; a volunteer sees only their own profile. */
+    public List<Volunteer> getAll() {
+        return repo().findAll().stream().filter(v -> Session.getInstance().canSee(v.getUserId())).toList();
+    }
 
     public List<User> getVolunteerUsers() {
+        User me = Session.getInstance().getCurrentUser();
+        if (!me.managesAllRecords()) return List.of(me);
         return users().findAll().stream().filter(u -> u.getType() == UserType.VOLUNTEER).toList();
     }
 
@@ -43,14 +49,18 @@ public class VolunteerController {
     }
 
     public void update(int id, String name, User user, List<String> skills, Collection<DayOfWeek> days) {
+        find(id);
         Volunteer v = validated(id, name, user, skills, days);
         uniqueUser(user, () -> repo().update(v));
     }
 
-    public void delete(int id) { repo().delete(id); }
+    public void delete(int id) {
+        find(id);
+        repo().delete(id);
+    }
 
     public String certificate(int volunteerId) {
-        Volunteer v = repo().findById(volunteerId).orElseThrow(() -> new IllegalArgumentException("Volunteer not found"));
+        Volunteer v = find(volunteerId);
         if (v.getTotalHours().signum() == 0) throw new IllegalArgumentException(v.getName() + " has no logged hours yet");
         StringBuilder text = new StringBuilder()
                 .append("CERTIFICATE OF VOLUNTEER SERVICE\n\n")
@@ -70,6 +80,7 @@ public class VolunteerController {
         if (name == null || name.isBlank()) throw new IllegalArgumentException("Name is required");
         if (name.strip().length() > 255) throw new IllegalArgumentException("Name must be at most 255 characters");
         if (user == null) throw new IllegalArgumentException("Pick the user this volunteer logs in as");
+        Session.getInstance().requireOwner(user.getId());
         boolean isVolunteer = users().findById(user.getId()).map(u -> u.getType() == UserType.VOLUNTEER).orElse(false);
         if (!isVolunteer) throw new IllegalArgumentException("User " + user.getUsername() + " is not a volunteer user");
         List<String> known = getSkills();
@@ -81,6 +92,12 @@ public class VolunteerController {
         String dayText = days.isEmpty() ? null
                 : EnumSet.copyOf(days).stream().map(DayOfWeek::name).collect(Collectors.joining(","));
         return new Volunteer(id, user.getId(), user.getUsername(), name.strip(), skillText, dayText, null);
+    }
+
+    private static Volunteer find(int id) {
+        Volunteer v = repo().findById(id).orElseThrow(() -> new IllegalArgumentException("Volunteer not found"));
+        Session.getInstance().requireOwner(v.getUserId());
+        return v;
     }
 
     private static void uniqueUser(User user, Runnable write) {

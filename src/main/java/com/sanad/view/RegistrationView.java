@@ -2,7 +2,6 @@ package com.sanad.view;
 
 import com.sanad.controller.EventController;
 import com.sanad.controller.RegistrationController;
-import com.sanad.controller.UserController;
 import com.sanad.model.event.Event;
 import com.sanad.model.event.Registration;
 import com.sanad.model.user.User;
@@ -19,7 +18,6 @@ public class RegistrationView extends CrudView<Registration> {
 
     private final RegistrationController controller = new RegistrationController();
     private final EventController events = new EventController();
-    private final UserController users = new UserController();
     private final ComboBox<Event> eventBox = ViewUtil.picker(e -> e.getName() + (e.getDate() == null ? "" : " (" + e.getDate() + ")"));
     private final ComboBox<User> userBox = ViewUtil.picker(u -> u.getUsername() + " (" + ViewUtil.pretty(u.getRole()) + ")");
     private final Label registered = new Label();
@@ -35,13 +33,14 @@ public class RegistrationView extends CrudView<Registration> {
 
         build(ViewUtil.field("Event", eventBox), ViewUtil.field("User", userBox),
                 ViewUtil.field("Registered", registered));
-        action("Mark attended", Feather.CHECK_SQUARE, controller::markAttended, "Attendance marked");
+        if (controller.canMarkAttended())
+            action("Mark attended", Feather.CHECK_SQUARE, controller::markAttended, "Attendance marked");
     }
 
     @Override
     protected List<Registration> load() {
         eventBox.getItems().setAll(events.getAll());
-        userBox.getItems().setAll(users.getAll());
+        userBox.getItems().setAll(controller.getUsers());
         showRegistered();
         return controller.getAll();
     }

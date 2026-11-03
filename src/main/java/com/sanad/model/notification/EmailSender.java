@@ -4,7 +4,7 @@ import com.sanad.db.DatabaseConnection;
 import com.sanad.model.user.User;
 
 /**
- * MODEL: sends a notification by email. Phase 1 has no real mail service, so the message is only recorded.
+ * STRATEGY PATTERN (Concrete Strategy): sends a notification by email. Phase 1 has no real mail service, so the message is only recorded.
  */
 public class EmailSender implements NotificationSender {
     @Override

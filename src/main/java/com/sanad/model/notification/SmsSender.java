@@ -4,7 +4,7 @@ import com.sanad.db.DatabaseConnection;
 import com.sanad.model.user.User;
 
 /**
- * MODEL: sends a notification by SMS. Phase 1 has no real SMS service, so the message is only recorded.
+ * STRATEGY PATTERN (Concrete Strategy): sends a notification by SMS. Phase 1 has no real SMS service, so the message is only recorded.
  */
 public class SmsSender implements NotificationSender {
     @Override

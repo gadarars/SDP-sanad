@@ -4,9 +4,10 @@ import atlantafx.base.theme.PrimerDark;
 import atlantafx.base.theme.PrimerLight;
 import atlantafx.base.theme.Styles;
 import atlantafx.base.theme.Tweaks;
-import com.sanad.auth.Session;
+import com.sanad.controller.LoginController;
 import com.sanad.model.user.Feature;
 import com.sanad.model.user.User;
+import com.sanad.model.user.UserType;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.scene.control.Button;
@@ -36,7 +37,7 @@ public class MainView extends BorderPane {
      * Shows only the sections the logged-in user's type is allowed to open.
      */
     public MainView(Runnable onLogout) {
-        User user = Session.getInstance().getCurrentUser();
+        User user = new LoginController().currentUser();
         applyTheme();
         List<Section> sections = List.of(
                 new Section("Donations", Feather.GIFT, Feature.DONATIONS, new DonationView()),
@@ -46,7 +47,7 @@ public class MainView extends BorderPane {
                 new Section("Events", Feather.CALENDAR, Feature.EVENTS, new EventView()),
                 new Section("Registrations", Feather.USER_CHECK, Feature.EVENTS, new RegistrationView()),
                 new Section("Beneficiaries", Feather.HEART, Feature.BENEFICIARIES, new BeneficiaryView()),
-                new Section("Users", Feather.SHIELD, Feature.USERS, new UserView()),
+                new Section(user.getType() == UserType.ADMIN ? "Users" : "My account", Feather.SHIELD, Feature.USERS, new UserView()),
                 new Section("Lookup tables", Feather.LIST, Feature.LOOKUPS, new LookupView()),
                 new Section("Notifications", Feather.BELL, Feature.NOTIFICATIONS, new NotificationView()));
         ListView<Section> nav = new ListView<>(FXCollections.observableArrayList(

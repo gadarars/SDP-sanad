@@ -23,6 +23,10 @@ public class LoginController {
         Session.getInstance().login(user);
     }
 
+    public User currentUser() {
+        return Session.getInstance().getCurrentUser();
+    }
+
     public void logout() {
         Session.getInstance().logout();
     }

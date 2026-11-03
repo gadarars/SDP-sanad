@@ -1,5 +1,6 @@
 package com.sanad.controller;
 
+import com.sanad.auth.Session;
 import com.sanad.db.DatabaseConnection;
 import com.sanad.model.beneficiary.Beneficiary;
 import com.sanad.model.beneficiary.BeneficiaryRepository;
@@ -29,8 +30,13 @@ public class BeneficiaryController {
 
     private final LookupController lookups = new LookupController();
 
+    /** Staff see every beneficiary; a beneficiary sees only their own record. */
     public List<Beneficiary> getAll() {
-        return repo().findAll();
+        return repo().findAll().stream().filter(b -> Session.getInstance().canSee(b.getUserId())).toList();
+    }
+
+    public boolean canEdit() {
+        return Session.getInstance().managesAllRecords();
     }
 
     public List<String> getNeedTypes() {
@@ -38,38 +44,54 @@ public class BeneficiaryController {
     }
 
     public List<User> getBeneficiaryUsers() {
+        User me = Session.getInstance().getCurrentUser();
+        if (!me.managesAllRecords()) return List.of(me);
         return userRepo().findAll().stream().filter(u -> u.getType() == UserType.BENEFICIARY).toList();
     }
 
     public void add(String name, String need, String contact, Integer userId) {
+        Session.getInstance().requireManager();
         Beneficiary b = validated(0, name, need, contact, userId);
         uniqueUser(() -> repo().add(b));
     }
 
+    /** A beneficiary may update their own record but stays linked to their own account. */
     public void update(int id, String name, String need, String contact, Integer userId) {
-        Beneficiary b = validated(id, name, need, contact, userId);
+        Beneficiary stored = find(id);
+        Integer linked = canEdit() ? userId : stored.getUserId();
+        Beneficiary b = validated(id, name, need, contact, linked);
         uniqueUser(() -> repo().update(b));
     }
 
     public void delete(int id) {
+        Session.getInstance().requireManager();
         repo().delete(id);
     }
 
     public List<Distribution> getHistory(int beneficiaryId) {
+        find(beneficiaryId);
         return distributions().findByBeneficiary(beneficiaryId);
     }
 
     public void addDistribution(int beneficiaryId, String item, BigDecimal quantity, LocalDate givenOn) {
+        Session.getInstance().requireManager();
         if (beneficiaryId <= 0) throw new IllegalArgumentException("Select a beneficiary first");
         distributions().add(validatedDistribution(0, beneficiaryId, item, quantity, givenOn));
     }
 
     public void updateDistribution(int id, String item, BigDecimal quantity, LocalDate givenOn) {
+        Session.getInstance().requireManager();
         distributions().update(validatedDistribution(id, 0, item, quantity, givenOn));
     }
 
     public void deleteDistribution(int id) {
+        Session.getInstance().requireManager();
         distributions().delete(id);
+    }
+
+    private Beneficiary find(int id) {
+        return getAll().stream().filter(b -> b.getId() == id).findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Beneficiary not found"));
     }
 
     private Beneficiary validated(int id, String name, String need, String contact, Integer userId) {

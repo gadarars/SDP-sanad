@@ -8,5 +8,5 @@ public interface Subject {
 
     void removeObserver(Observer o);
 
-    void notifyObservers(String message);
+    void notifyObservers();
 }

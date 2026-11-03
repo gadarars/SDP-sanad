@@ -36,6 +36,7 @@ public class DistributionView extends CrudView<Distribution> {
                 ViewUtil.<Distribution>col("How much", "quantity", q -> ViewUtil.plain((BigDecimal) q)));
 
         build(ViewUtil.field("What", itemF), ViewUtil.field("How much", quantityF), ViewUtil.field("Date", datePicker));
+        if (!controller.canEdit()) readOnly();
         showFor(null);
     }
 

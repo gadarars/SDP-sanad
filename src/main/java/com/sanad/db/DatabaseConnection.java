@@ -20,7 +20,7 @@ public class DatabaseConnection {
 
     private static final String CANNOT_CONNECT = "Cannot open database. Is MySQL running? (docker compose up -d)";
 
-    private static DatabaseConnection instance;
+    private static DatabaseConnection uniqueInstance;
     private final Jdbi jdbi;
 
     private DatabaseConnection() {
@@ -57,10 +57,10 @@ public class DatabaseConnection {
     }
 
     public static synchronized DatabaseConnection getInstance() {
-        if (instance == null) {
-            instance = new DatabaseConnection();
+        if (uniqueInstance == null) {
+            uniqueInstance = new DatabaseConnection();
         }
-        return instance;
+        return uniqueInstance;
     }
 
     /**

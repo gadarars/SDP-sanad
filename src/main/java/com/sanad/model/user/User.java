@@ -55,4 +55,9 @@ public abstract class User {
      * This type's own fields keyed by column name, e.g. {"skills": "TEACHING"}.
      */
     public abstract Map<String, String> getDetails();
+
+    /**
+     * True when this user may see and change every record, not only their own.
+     */
+    public abstract boolean managesAllRecords();
 }

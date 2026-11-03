@@ -7,22 +7,26 @@ import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 
 import java.util.List;
+import java.util.Optional;
 
 /** MODEL: database access (full CRUD) for donations. */
 @RegisterConstructorMapper(Donation.class)
 public interface DonationRepository {
 
     String SELECT = "SELECT d.id, d.user_id, COALESCE(u.username, d.donor_name) AS donor_name, d.amount, d.method, "
-            + "d.gift_wrapping, d.thank_you_card FROM donations d LEFT JOIN users u ON d.user_id = u.id ";
+            + "d.add_ons FROM donations d LEFT JOIN users u ON d.user_id = u.id ";
 
     // CREATE
-    @SqlUpdate("INSERT INTO donations(user_id, donor_name, amount, method, gift_wrapping, thank_you_card) "
-            + "VALUES(:userId, :donorName, :amount, :method, :giftWrapping, :thankYouCard)")
+    @SqlUpdate("INSERT INTO donations(user_id, donor_name, amount, method, add_ons) "
+            + "VALUES(:userId, :donorName, :amount, :method, :addOnCodes)")
     void add(@BindBean Donation x);
 
     // READ
     @SqlQuery(SELECT + "ORDER BY d.id")
     List<Donation> findAll();
+
+    @SqlQuery(SELECT + "WHERE d.id = :id")
+    Optional<Donation> findById(@Bind("id") int id);
 
     // READ BY DONOR
     @SqlQuery(SELECT + "WHERE d.user_id = :userId ORDER BY d.id")
@@ -30,7 +34,7 @@ public interface DonationRepository {
 
     // UPDATE
     @SqlUpdate("UPDATE donations SET user_id=:userId, donor_name=:donorName, amount=:amount, method=:method, "
-            + "gift_wrapping=:giftWrapping, thank_you_card=:thankYouCard WHERE id=:id")
+            + "add_ons=:addOnCodes WHERE id=:id")
     void update(@BindBean Donation x);
 
     // DELETE

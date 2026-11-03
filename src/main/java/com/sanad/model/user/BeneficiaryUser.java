@@ -25,11 +25,16 @@ public class BeneficiaryUser extends User {
 
     @Override
     public Set<Feature> getFeatures() {
-        return Set.of(Feature.BENEFICIARIES);
+        return Set.of(Feature.BENEFICIARIES, Feature.USERS);
     }
 
     @Override
     public Map<String, String> getDetails() {
         return Map.of("address", address);
+    }
+
+    @Override
+    public boolean managesAllRecords() {
+        return false;
     }
 }

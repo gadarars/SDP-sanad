@@ -36,6 +36,10 @@ public class BeneficiaryView extends CrudView<Beneficiary> {
 
         build(ViewUtil.field("Name", nameF), ViewUtil.field("Need", needBox), ViewUtil.field("Contact", contactF),
                 ViewUtil.field("User", userBox));
+        if (!controller.canEdit()) {
+            updateOnly();
+            userBox.setDisable(true);
+        }
 
         table.getSelectionModel().selectedItemProperty().addListener((o, old, b) -> history.showFor(b));
         VBox.setVgrow(history, Priority.ALWAYS);

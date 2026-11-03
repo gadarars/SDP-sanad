@@ -29,6 +29,10 @@ public abstract class CrudView<T> extends VBox {
     private final String noun;
     private final Label count = new Label();
     private final HBox footer = new HBox(8);
+    private final HBox fieldRow = new HBox(12);
+    private final Button addButton = button("Add", Feather.PLUS, Styles.ACCENT);
+    private final Button updateButton = button("Update", Feather.EDIT_2);
+    private final Button deleteButton = button("Delete", Feather.TRASH_2, Styles.DANGER, Styles.BUTTON_OUTLINED);
     private Message status;
 
     /**
@@ -79,26 +83,44 @@ public abstract class CrudView<T> extends VBox {
      * Adds the form card with the given fields; call at the end of the subclass constructor.
      */
     protected void build(Node... fields) {
-        Button add = button("Add", Feather.PLUS, Styles.ACCENT);
-        Button update = button("Update", Feather.EDIT_2);
-        Button delete = button("Delete", Feather.TRASH_2, Styles.DANGER, Styles.BUTTON_OUTLINED);
         BooleanBinding nothingSelected = table.getSelectionModel().selectedItemProperty().isNull();
-        update.disableProperty().bind(nothingSelected);
-        delete.disableProperty().bind(nothingSelected);
+        updateButton.disableProperty().bind(nothingSelected);
+        deleteButton.disableProperty().bind(nothingSelected);
 
-        add.setOnAction(e -> run(this::add, noun + " added"));
-        update.setOnAction(e -> run(() -> update(selected()), noun + " updated"));
-        delete.setOnAction(e -> {
+        addButton.setOnAction(e -> run(this::add, noun + " added"));
+        updateButton.setOnAction(e -> run(() -> update(selected()), noun + " updated"));
+        deleteButton.setOnAction(e -> {
             if (confirmDelete(selected())) run(() -> delete(selected()), noun + " deleted");
         });
 
-        HBox row = new HBox(12, fields);
-        row.setAlignment(Pos.BOTTOM_LEFT);
+        fieldRow.getChildren().setAll(fields);
+        fieldRow.setAlignment(Pos.BOTTOM_LEFT);
         Card card = new Card();
-        card.setBody(row);
-        footer.getChildren().addAll(0, List.of(add, update, delete));
+        card.setBody(fieldRow);
+        footer.getChildren().addAll(0, List.of(addButton, updateButton, deleteButton));
         card.setFooter(footer);
         getChildren().add(1, card);
+    }
+
+    /**
+     * Hides the form and its Add, Update and Delete buttons, keeping the table and any extra actions.
+     */
+    protected void readOnly() {
+        hide(fieldRow, addButton, updateButton, deleteButton);
+    }
+
+    /**
+     * Hides Add and Delete, so the user can only update the rows they are shown.
+     */
+    protected void updateOnly() {
+        hide(addButton, deleteButton);
+    }
+
+    private static void hide(Node... nodes) {
+        for (Node n : nodes) {
+            n.setVisible(false);
+            n.setManaged(false);
+        }
     }
 
     /**
