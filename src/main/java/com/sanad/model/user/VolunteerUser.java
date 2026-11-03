@@ -9,8 +9,8 @@ import java.util.Set;
 public class VolunteerUser extends User {
     private final String skills;
 
-    VolunteerUser(int id, String username, String email, String skills) {
-        super(id, username, email);
+    VolunteerUser(int id, String username, String email, String phone, String skills) {
+        super(id, username, email, phone);
         this.skills = skills;
     }
 

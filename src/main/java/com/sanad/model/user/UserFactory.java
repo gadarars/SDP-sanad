@@ -12,17 +12,17 @@ public abstract class UserFactory {
     /**
      * {@code details} holds the type-specific fields by column name; columns of other types are ignored.
      */
-    public User buildUser(int id, String username, String email, Map<String, String> details) {
+    public User buildUser(int id, String username, String email, String phone, Map<String, String> details) {
         Map<String, String> fields = new HashMap<>();
         for (String column : UserType.allFields()) {
             String value = details.get(column);
             fields.put(column, value == null ? "" : value.strip());
         }
-        return createUser(id, username.strip(), email == null ? null : email.strip(), fields);
+        return createUser(id, username.strip(), email == null ? null : email.strip(), phone == null ? null : phone.strip(), fields);
     }
 
     /**
      * The factory method: {@code details} has every type-specific column, never null.
      */
-    protected abstract User createUser(int id, String username, String email, Map<String, String> details);
+    protected abstract User createUser(int id, String username, String email, String phone, Map<String, String> details);
 }

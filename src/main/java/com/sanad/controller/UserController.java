@@ -22,10 +22,10 @@ public class UserController {
     }
 
     /**
-     * {@code details} holds the type-specific fields by column name, e.g. {"phone": "..."}.
+     * {@code details} holds the type-specific fields by column name, e.g. {"skills": "..."}.
      */
-    public void add(String username, String email, UserType type, String password, Map<String, String> details) {
-        User user = validated(0, username, email, type, details);
+    public void add(String username, String email, String phone, UserType type, String password, Map<String, String> details) {
+        User user = validated(0, username, email, phone, type, details);
         String hash = hashed(password);
         unique(user, () -> repo().add(user, hash));
     }
@@ -33,8 +33,8 @@ public class UserController {
     /**
      * Leave the password empty to keep the current one.
      */
-    public void update(int id, String username, String email, UserType type, String password, Map<String, String> details) {
-        User user = validated(id, username, email, type, details);
+    public void update(int id, String username, String email, String phone, UserType type, String password, Map<String, String> details) {
+        User user = validated(id, username, email, phone, type, details);
         String hash = password == null || password.isEmpty() ? null : hashed(password);
         if (type != UserType.ADMIN) keepAnAdmin(id);
         unique(user, () -> repo().update(user, hash));
@@ -48,10 +48,10 @@ public class UserController {
         repo().delete(id);
     }
 
-    private static User validated(int id, String username, String email, UserType type, Map<String, String> details) {
+    private static User validated(int id, String username, String email, String phone, UserType type, Map<String, String> details) {
         if (username == null || username.isBlank()) throw new IllegalArgumentException("Username is required");
         if (type == null) throw new IllegalArgumentException("Role is required");
-        return type.getFactory().buildUser(id, username, email, details);   // FACTORY METHOD
+        return type.getFactory().buildUser(id, username, email, phone, details);   // FACTORY METHOD
     }
 
     private static String hashed(String password) {
