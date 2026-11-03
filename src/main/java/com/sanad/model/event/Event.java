@@ -7,7 +7,7 @@ import java.util.Objects;
 
 /**
  * MODEL: an event (fundraiser, workshop, outreach...).
- * OBSERVER PATTERN (Concrete Subject): its registered attendees are its observers.
+ * OBSERVER PATTERN (Concrete Subject): its registered attendees and assigned volunteers are its observers.
  */
 public class Event implements Subject {
     private int id;
@@ -66,7 +66,7 @@ public class Event implements Subject {
     }
 
     /**
-     * Attendees hear about a change only when the name, date or location changed.
+     * Observers hear about a change only when the name, date or location changed.
      */
     public void setDetails(String name, LocalDate date, String location, String category) {
         boolean changed = !Objects.equals(this.name, name) || !Objects.equals(this.date, date)

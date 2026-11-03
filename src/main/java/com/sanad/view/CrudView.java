@@ -47,7 +47,6 @@ public abstract class CrudView<T> extends VBox {
         heading.getStyleClass().add(Styles.TITLE_3);
         count.getStyleClass().add(Styles.TEXT_MUTED);
 
-
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         table.getStyleClass().add(Styles.STRIPED);
         table.setPlaceholder(new Label("Nothing here yet. Fill in the form above and press Add."));

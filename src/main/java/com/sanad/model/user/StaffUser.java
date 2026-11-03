@@ -16,10 +16,6 @@ public class StaffUser extends User {
         this.jobTitle = jobTitle;
     }
 
-    public String getJobTitle() {
-        return jobTitle;
-    }
-
     @Override
     public UserType getType() {
         return UserType.STAFF;

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * CONTROLLER: sits between the view and the model. Put validation / business rules here.
+ * CONTROLLER: validates input from the view and calls the repository.
  */
 public class LookupController {
 

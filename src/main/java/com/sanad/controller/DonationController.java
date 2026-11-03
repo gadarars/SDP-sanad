@@ -10,7 +10,7 @@ import com.sanad.model.user.UserType;
 import java.math.BigDecimal;
 import java.util.List;
 
-/** CONTROLLER: sits between the view and the model. Put validation / business rules here. */
+/** CONTROLLER: validates input from the view and calls the repository. */
 public class DonationController {
 
     /** Largest amount the DECIMAL(10,2) column holds. */
@@ -24,9 +24,7 @@ public class DonationController {
 
     /** All donations from the same donor: by linked user, else by donor name. */
     public List<Donation> getHistory(Donation d) {
-        if (d.getUserId() != null) {
-            return repo().findByUserId(d.getUserId());
-        }
+        if (d.getUserId() != null) return repo().findByUserId(d.getUserId());
         return getAll().stream()
                 .filter(x -> x.getUserId() == null && x.getDonorName().equalsIgnoreCase(d.getDonorName()))
                 .toList();
@@ -127,21 +125,12 @@ public class DonationController {
     }
 
     private void check(String donorName, BigDecimal amount, DonationMethod method) {
-        if (donorName == null || donorName.isBlank()) {
-            throw new IllegalArgumentException("Donor is required");
-        }
-        if (amount.signum() <= 0) {
-            throw new IllegalArgumentException("Amount must be positive");
-        }
-        if (amount.stripTrailingZeros().scale() > 2) {
+        if (donorName == null || donorName.isBlank()) throw new IllegalArgumentException("Donor is required");
+        if (amount.signum() <= 0) throw new IllegalArgumentException("Amount must be positive");
+        if (amount.stripTrailingZeros().scale() > 2)
             throw new IllegalArgumentException("Amount can have at most 2 decimal places");
-        }
-        if (amount.compareTo(MAX_AMOUNT) > 0) {
-            throw new IllegalArgumentException("Amount must be at most 99,999,999.99");
-        }
-        if (method == null) {
-            throw new IllegalArgumentException("Method is required");
-        }
+        if (amount.compareTo(MAX_AMOUNT) > 0) throw new IllegalArgumentException("Amount must be at most 99,999,999.99");
+        if (method == null) throw new IllegalArgumentException("Method is required");
     }
 
     private static DonationRepository repo() {

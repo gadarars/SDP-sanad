@@ -55,7 +55,7 @@ Views never talk to the database directly.
 
 **Adding a module:** copy the four Volunteer files (`Volunteer`, `VolunteerRepository`, `VolunteerController`,
 `VolunteerView`) and rename them. Then add its table in a new migration such as
-`src/main/resources/db/migration/V3__create_grants.sql` and its tab in `view/MainView.java`. Never edit a migration that
+`src/main/resources/db/migration/V<next>__create_grants.sql` and its tab in `view/MainView.java`. Never edit a migration that
 has already run.
 
 ## Team rules

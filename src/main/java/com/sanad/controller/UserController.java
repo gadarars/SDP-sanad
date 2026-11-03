@@ -55,7 +55,7 @@ public class UserController {
     public void delete(int id) {
         requireAdmin();
         User me = Session.getInstance().getCurrentUser();
-        if (me != null && me.getId() == id)
+        if (me.getId() == id)
             throw new IllegalArgumentException("You can't delete the account you are logged in as");
         keepAnAdmin(id);
         repo().delete(id);

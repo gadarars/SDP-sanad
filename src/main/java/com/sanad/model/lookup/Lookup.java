@@ -5,8 +5,8 @@ package com.sanad.model.lookup;
  */
 public class Lookup {
     private final int id;
-    private String kind;
-    private String name;
+    private final String kind;
+    private final String name;
 
     public Lookup(int id, String kind, String name) {
         this.id = id;
@@ -22,15 +22,7 @@ public class Lookup {
         return kind;
     }
 
-    public void setKind(String kind) {
-        this.kind = kind;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 }

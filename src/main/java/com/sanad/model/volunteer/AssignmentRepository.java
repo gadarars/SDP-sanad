@@ -1,6 +1,9 @@
 package com.sanad.model.volunteer;
 
+import com.sanad.model.user.User;
+import com.sanad.model.user.UserMapper;
 import org.jdbi.v3.sqlobject.config.RegisterConstructorMapper;
+import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
@@ -27,6 +30,12 @@ public interface AssignmentRepository {
 
     @SqlQuery(SELECT + "WHERE a.volunteer_id = :volunteerId ORDER BY e.date, a.id")
     List<Assignment> findByVolunteer(int volunteerId);
+
+    /** The users behind the volunteers assigned to an event, so they can be notified. */
+    @SqlQuery("SELECT DISTINCT u.* FROM users u JOIN volunteers v ON v.user_id = u.id "
+            + "JOIN volunteer_assignments a ON a.volunteer_id = v.id WHERE a.event_id = :eventId")
+    @RegisterRowMapper(UserMapper.class)
+    List<User> findAssignedUsers(int eventId);
 
     @SqlUpdate("UPDATE volunteer_assignments SET volunteer_id=:volunteerId, event_id=:eventId, skill=:skill WHERE id=:id")
     void update(@BindBean Assignment a);

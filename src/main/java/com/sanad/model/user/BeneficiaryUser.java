@@ -14,10 +14,6 @@ public class BeneficiaryUser extends User {
         this.address = address;
     }
 
-    public String getAddress() {
-        return address;
-    }
-
     @Override
     public UserType getType() {
         return UserType.BENEFICIARY;

@@ -14,10 +14,6 @@ public class VolunteerUser extends User {
         this.skills = skills;
     }
 
-    public String getSkills() {
-        return skills;
-    }
-
     @Override
     public UserType getType() {
         return UserType.VOLUNTEER;
