@@ -7,7 +7,7 @@ import java.util.Map;
  */
 public class DonorFactory extends UserFactory {
     @Override
-    protected User createUser(int id, String username, String email, Map<String, String> details) {
-        return new DonorUser(id, username, email, details.get("phone"));
+    protected User createUser(int id, String username, String email, String phone, Map<String, String> details) {
+        return new DonorUser(id, username, email, phone);
     }
 }

@@ -7,8 +7,8 @@ import java.util.Set;
  * MODEL: an ADMIN user, a staff member who can also manage users. Created only through UserFactory.
  */
 public class AdminUser extends StaffUser {
-    AdminUser(int id, String username, String email, String jobTitle) {
-        super(id, username, email, jobTitle);
+    AdminUser(int id, String username, String email, String phone, String jobTitle) {
+        super(id, username, email, phone, jobTitle);
     }
 
     @Override

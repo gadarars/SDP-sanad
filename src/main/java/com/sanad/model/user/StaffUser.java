@@ -11,8 +11,8 @@ import static com.sanad.model.user.Feature.*;
 public class StaffUser extends User {
     private final String jobTitle;
 
-    StaffUser(int id, String username, String email, String jobTitle) {
-        super(id, username, email);
+    StaffUser(int id, String username, String email, String phone, String jobTitle) {
+        super(id, username, email, phone);
         this.jobTitle = jobTitle;
     }
 

@@ -33,16 +33,16 @@ public interface UserRepository {
      * Columns missing from {@code details} are stored as NULL.
      */
     @SqlUpdate("INSERT INTO users(username, email, role, password, job_title, phone, skills, address) "
-            + "VALUES(:u.username, :u.email, :u.role, :password, :d.job_title, :d.phone, :d.skills, :d.address)")
-    void insertRow(@BindBean("u") User u, @BindMap(value = "d", keys = {"job_title", "phone", "skills", "address"}) Map<String, String> details,
+            + "VALUES(:u.username, :u.email, :u.role, :password, :d.job_title, :u.phone, :d.skills, :d.address)")
+    void insertRow(@BindBean("u") User u, @BindMap(value = "d", keys = {"job_title", "skills", "address"}) Map<String, String> details,
                    @Bind("password") String passwordHash);
 
     /**
      * Columns missing from {@code details} are set to NULL.
      */
     @SqlUpdate("UPDATE users SET username=:u.username, email=:u.email, role=:u.role, password=COALESCE(:password, password), "
-            + "job_title=:d.job_title, phone=:d.phone, skills=:d.skills, address=:d.address WHERE id=:u.id")
-    void updateRow(@BindBean("u") User u, @BindMap(value = "d", keys = {"job_title", "phone", "skills", "address"}) Map<String, String> details,
+            + "job_title=:d.job_title, phone=:u.phone, skills=:d.skills, address=:d.address WHERE id=:u.id")
+    void updateRow(@BindBean("u") User u, @BindMap(value = "d", keys = {"job_title", "skills", "address"}) Map<String, String> details,
                    @Bind("password") String passwordHash);
 
     @SqlQuery("SELECT * FROM users ORDER BY id")

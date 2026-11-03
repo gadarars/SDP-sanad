@@ -12,11 +12,13 @@ public abstract class User {
     private final int id;
     private final String username;
     private final String email;
+    private final String phone;
 
-    protected User(int id, String username, String email) {
+    protected User(int id, String username, String email, String phone) {
         this.id = id;
         this.username = username;
         this.email = email;
+        this.phone = phone;
     }
 
     public int getId() {
@@ -29,6 +31,10 @@ public abstract class User {
 
     public String getEmail() {
         return email;
+    }
+
+    public String getPhone() {
+        return phone;
     }
 
     public abstract UserType getType();
@@ -46,7 +52,7 @@ public abstract class User {
     public abstract Set<Feature> getFeatures();
 
     /**
-     * This type's own fields keyed by column name, e.g. {"phone": "0100 123 4567"}.
+     * This type's own fields keyed by column name, e.g. {"skills": "TEACHING"}.
      */
     public abstract Map<String, String> getDetails();
 }

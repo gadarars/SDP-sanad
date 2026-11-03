@@ -9,8 +9,8 @@ import java.util.Set;
 public class BeneficiaryUser extends User {
     private final String address;
 
-    BeneficiaryUser(int id, String username, String email, String address) {
-        super(id, username, email);
+    BeneficiaryUser(int id, String username, String email, String phone, String address) {
+        super(id, username, email, phone);
         this.address = address;
     }
 
