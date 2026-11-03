@@ -30,9 +30,11 @@ public class RegistrationController {
 
     public boolean canMarkAttended() { return Session.getInstance().managesAllRecords(); }
 
+    /** Staff see everyone registered for the event; anyone else sees only themselves. */
     public List<String> registeredNames(Event event) {
         if (event == null) return List.of();
-        return repo().findByEvent(event.getId()).stream().map(Registration::getUsername).toList();
+        return repo().findByEvent(event.getId()).stream().filter(r -> Session.getInstance().canSee(r.getUserId()))
+                .map(Registration::getUsername).toList();
     }
 
     public void add(User user, Event event) {
