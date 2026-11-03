@@ -3,25 +3,19 @@ package com.sanad.model.donation;
 import java.math.BigDecimal;
 
 /**
- * DECORATOR PATTERN (Concrete Component).
- * The base donation before any extras are applied.
+ * DECORATOR PATTERN (Concrete Component): the donation amount before any add-ons.
  */
 public class BaseDonationComponent extends DonationComponent {
 
     private final BigDecimal amount;
 
     public BaseDonationComponent(BigDecimal amount) {
-        this("Donation", amount);
-    }
-
-    public BaseDonationComponent(String description, BigDecimal amount) {
-        this.description = description != null ? description : "Donation";
-        this.amount = amount != null ? amount : BigDecimal.ZERO;
+        description = "Donation";
+        this.amount = amount;
     }
 
     @Override
-    public BigDecimal getAmount() {
+    public BigDecimal cost() {
         return amount;
     }
 }
-

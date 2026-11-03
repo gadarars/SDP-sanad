@@ -9,10 +9,7 @@ import com.sanad.model.user.UserType;
 import java.math.BigDecimal;
 import java.util.List;
 
-/**
- * CONTROLLER: sits between the view and the model.
- * Handles validation, business rules, donor history, receipts, and pattern integration.
- */
+/** CONTROLLER: sits between the view and the model. Put validation / business rules here. */
 public class DonationController {
 
     /** Largest amount the DECIMAL(10,2) column holds. */
@@ -22,87 +19,54 @@ public class DonationController {
         return repo().findAll();
     }
 
-    /**
-     * Returns all donations for one donor user.
-     */
-    public List<Donation> getByDonor(int userId) {
-        return repo().findByUserId(userId);
-    }
-
-    /**
-     * Returns donation history for a donation record (by userId or donorName).
-     */
+    /** All donations from the same donor: by linked user, else by donor name. */
     public List<Donation> getHistory(Donation d) {
-        if (d == null) {
-            return List.of();
-        }
-        if (d.getUserId() != null && d.getUserId() > 0) {
-            return getByDonor(d.getUserId());
+        if (d.getUserId() != null) {
+            return repo().findByUserId(d.getUserId());
         }
         return getAll().stream()
-                .filter(x -> x.getDonorName() != null && x.getDonorName().equalsIgnoreCase(d.getDonorName()))
+                .filter(x -> x.getUserId() == null && x.getDonorName().equalsIgnoreCase(d.getDonorName()))
                 .toList();
     }
 
-    /**
-     * Returns all registered users with the DONOR role.
-     */
+    /** Users with the DONOR role. */
     public List<User> getDonors() {
         return userRepo().findAll().stream()
                 .filter(u -> u.getType() == UserType.DONOR)
                 .toList();
     }
 
-    /**
-     * Adds a donation and executes the selected strategy's method-specific work.
-     * Returns the strategy confirmation message.
-     */
-    public String add(Integer userId, String donorName, BigDecimal amount, DonationMethod method) {
+    public void add(Integer userId, String donorName, BigDecimal amount, DonationMethod method,
+                    boolean giftWrapping, boolean thankYouCard) {
         check(donorName, amount, method);
-        Donation d = new Donation(0, userId, donorName.strip(), amount, method.getName());
-        d.setDonationMethod(method);
-        repo().add(d);
-        return d.processMethod();
+        repo().add(new Donation(0, userId, donorName.strip(), amount, method.getName(), giftWrapping, thankYouCard));
     }
 
-    /**
-     * Updates a donation and executes the selected strategy's method-specific work.
-     * Returns the strategy confirmation message.
-     */
-    public String update(int id, Integer userId, String donorName, BigDecimal amount, DonationMethod method) {
+    public void update(int id, Integer userId, String donorName, BigDecimal amount, DonationMethod method,
+                       boolean giftWrapping, boolean thankYouCard) {
         check(donorName, amount, method);
-        Donation d = new Donation(id, userId, donorName.strip(), amount, method.getName());
-        d.setDonationMethod(method);
-        repo().update(d);
-        return d.processMethod();
+        repo().update(new Donation(id, userId, donorName.strip(), amount, method.getName(), giftWrapping, thankYouCard));
     }
 
     public void delete(int id) {
         repo().delete(id);
     }
 
-    /**
-     * DECORATOR: Builds a decorated donation component with the chosen add-ons.
-     */
-    public DonationComponent decorate(BigDecimal baseAmount, boolean giftWrapping, boolean thankYouCard) {
-        DonationComponent component = new BaseDonationComponent("Donation", baseAmount != null ? baseAmount : BigDecimal.ZERO);
+    /** DECORATOR: wraps the base amount in the chosen add-ons. */
+    public DonationComponent decorate(BigDecimal amount, boolean giftWrapping, boolean thankYouCard) {
+        DonationComponent donation = new BaseDonationComponent(amount);
         if (giftWrapping) {
-            component = new GiftWrappingDecorator(component);
+            donation = new GiftWrappingDecorator(donation);
         }
         if (thankYouCard) {
-            component = new ThankYouCardDecorator(component);
+            donation = new ThankYouCardDecorator(donation);
         }
-        return component;
+        return donation;
     }
 
-    /**
-     * Generates a printable receipt string for a donation, optionally including add-on extras.
-     */
-    public String generateReceipt(Donation d, boolean giftWrapping, boolean thankYouCard) {
-        if (d == null) {
-            throw new IllegalArgumentException("No donation selected");
-        }
-        DonationComponent comp = decorate(d.getAmount(), giftWrapping, thankYouCard);
+    /** Printable receipt for a saved donation and its add-ons. */
+    public String generateReceipt(Donation d) {
+        DonationComponent total = decorate(d.getAmount(), d.isGiftWrapping(), d.isThankYouCard());
 
         StringBuilder sb = new StringBuilder();
         sb.append("══════════════════════════════════════════════════\n");
@@ -112,17 +76,11 @@ public class DonationController {
         sb.append(String.format("%-18s: %s\n", "Donor Name", d.getDonorName()));
         sb.append(String.format("%-18s: %s\n", "Method", d.getDonationMethod().getLabel()));
         sb.append(String.format("%-18s: EGP %,.2f\n", "Base Amount", d.getAmount()));
-        if (giftWrapping) {
-            sb.append(String.format("%-18s: EGP %,.2f\n", "  + Gift Wrapping", new BigDecimal("25.00")));
-        }
-        if (thankYouCard) {
-            sb.append(String.format("%-18s: EGP %,.2f\n", "  + Thank-You Card", new BigDecimal("15.00")));
-        }
         sb.append("──────────────────────────────────────────────────\n");
-        sb.append(String.format("%-18s: %s\n", "Details", comp.getDescription()));
-        sb.append(String.format("%-18s: EGP %,.2f\n", "Total Amount", comp.getAmount()));
+        sb.append(String.format("%-18s: %s\n", "Details", total.getDescription()));
+        sb.append(String.format("%-18s: EGP %,.2f\n", "Total Amount", total.cost()));
         sb.append("──────────────────────────────────────────────────\n\n");
-        sb.append("Status: ").append(d.processMethod()).append("\n\n");
+        sb.append("Status: ").append(d.performProcess()).append("\n\n");
         sb.append("         Thank you for your generosity!           \n");
         sb.append("══════════════════════════════════════════════════\n");
         return sb.toString();
@@ -132,7 +90,7 @@ public class DonationController {
         if (donorName == null || donorName.isBlank()) {
             throw new IllegalArgumentException("Donor is required");
         }
-        if (amount == null || amount.signum() <= 0) {
+        if (amount.signum() <= 0) {
             throw new IllegalArgumentException("Amount must be positive");
         }
         if (amount.stripTrailingZeros().scale() > 2) {

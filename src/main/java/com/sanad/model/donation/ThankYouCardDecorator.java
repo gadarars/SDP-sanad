@@ -3,12 +3,11 @@ package com.sanad.model.donation;
 import java.math.BigDecimal;
 
 /**
- * DECORATOR PATTERN (Concrete Decorator).
- * Adds a thank-you card add-on to the donation (+EGP 15.00).
+ * DECORATOR PATTERN (Concrete Decorator): adds a thank-you card to the donation.
  */
 public class ThankYouCardDecorator extends DonationDecorator {
 
-    private static final BigDecimal COST = new BigDecimal("15.00");
+    public static final BigDecimal COST = new BigDecimal("15.00");
 
     public ThankYouCardDecorator(DonationComponent component) {
         super(component);
@@ -20,8 +19,7 @@ public class ThankYouCardDecorator extends DonationDecorator {
     }
 
     @Override
-    public BigDecimal getAmount() {
-        return component.getAmount().add(COST);
+    public BigDecimal cost() {
+        return COST.add(component.cost());
     }
 }
-

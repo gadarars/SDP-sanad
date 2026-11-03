@@ -32,9 +32,6 @@ public final class DonationMethods {
 
     /** Looks up a method by its stored name, e.g. "ONLINE". */
     public static DonationMethod byName(String name) {
-        if (name == null) {
-            return METHODS.values().iterator().next();
-        }
         DonationMethod m = METHODS.get(name);
         if (m == null) {
             throw new IllegalArgumentException("Unknown method: " + name);
@@ -42,4 +39,3 @@ public final class DonationMethods {
         return m;
     }
 }
-
