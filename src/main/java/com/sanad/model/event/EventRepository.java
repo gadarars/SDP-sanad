@@ -5,6 +5,7 @@ import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import java.util.List;
+import java.util.Optional;
 
 /** MODEL: database access (CRUD) for events. */
 @RegisterConstructorMapper(Event.class)
@@ -15,6 +16,9 @@ public interface EventRepository {
 
     @SqlQuery("SELECT * FROM events ORDER BY date IS NULL, date, id")
     List<Event> findAll();
+
+    @SqlQuery("SELECT * FROM events WHERE id = :id")
+    Optional<Event> findById(int id);
 
     @SqlUpdate("UPDATE events SET name=:name, date=:date, location=:location, category=:category WHERE id=:id")
     void update(@BindBean Event e);

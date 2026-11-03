@@ -1,6 +1,9 @@
 package com.sanad.model.event;
 
+import com.sanad.model.user.User;
+import com.sanad.model.user.UserMapper;
 import org.jdbi.v3.sqlobject.config.RegisterConstructorMapper;
+import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
@@ -21,6 +24,11 @@ public interface RegistrationRepository {
 
     @SqlQuery(SELECT + "WHERE r.event_id = :eventId ORDER BY u.username")
     List<Registration> findByEvent(int eventId);
+
+    /** The registered users themselves, so they can be notified. */
+    @SqlQuery("SELECT u.* FROM users u JOIN event_registrations r ON r.user_id = u.id WHERE r.event_id = :eventId")
+    @RegisterRowMapper(UserMapper.class)
+    List<User> findAttendees(int eventId);
 
     /** Attendance is cleared when the registration moves to another event or user. */
     @SqlUpdate("UPDATE event_registrations SET attended = (attended AND event_id = :eventId AND user_id = :userId), event_id=:eventId, user_id=:userId WHERE id=:id")
