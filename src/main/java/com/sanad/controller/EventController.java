@@ -31,13 +31,16 @@ public class EventController {
         repo().add(new Event(0, name.strip(), date, location, category));
     }
 
-    /** OBSERVER: the event's attendees register on it, then changing its details notifies them. */
+    /**
+     * OBSERVER: the event's attendees register on it, then changing its details notifies them.
+     * The change is saved first, so attendees never hear about an update that failed.
+     */
     public void update(int id, String name, LocalDate date, String location, String category) {
         check(name, category);
         Event e = find(id);
+        repo().update(new Event(id, name.strip(), date, location, category));
         attachAttendees(e);
         e.setDetails(name.strip(), date, location, category);
-        repo().update(e);
     }
 
     /** Cancels the event, telling its attendees before their registrations are removed with it. */
