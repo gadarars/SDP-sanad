@@ -27,7 +27,7 @@ public class StaffUser extends User {
 
     @Override
     public Set<Feature> getFeatures() {
-        return Set.of(DONATIONS, VOLUNTEERS, EVENTS, BENEFICIARIES, LOOKUPS);
+        return Set.of(DONATIONS, VOLUNTEERS, EVENTS, BENEFICIARIES, LOOKUPS, NOTIFICATIONS);
     }
 
     @Override

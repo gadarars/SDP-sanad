@@ -46,7 +46,8 @@ public class MainView extends BorderPane {
                 new Section("Events", Feather.CALENDAR, Feature.EVENTS, new EventView()),
                 new Section("Beneficiaries", Feather.HEART, Feature.BENEFICIARIES, new BeneficiaryView()),
                 new Section("Users", Feather.SHIELD, Feature.USERS, new UserView()),
-                new Section("Lookup tables", Feather.LIST, Feature.LOOKUPS, new LookupView()));
+                new Section("Lookup tables", Feather.LIST, Feature.LOOKUPS, new LookupView()),
+                new Section("Notifications", Feather.BELL, Feature.NOTIFICATIONS, new NotificationView()));
         ListView<Section> nav = new ListView<>(FXCollections.observableArrayList(
                 sections.stream().filter(s -> user.getFeatures().contains(s.feature())).toList()));
         nav.getStyleClass().add(Tweaks.EDGE_TO_EDGE);
