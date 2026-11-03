@@ -21,7 +21,7 @@ public class UserView extends CrudView<User> {
     private static final UserType DEFAULT_TYPE = UserType.STAFF;
 
     private final UserController controller = new UserController();
-    private final TextField usernameF = new TextField(), emailF = new TextField();
+    private final TextField usernameF = new TextField(), emailF = new TextField(), phoneF = new TextField();
     private final PasswordField passwordF = new PasswordField();
     private final ComboBox<UserType> roleBox = ViewUtil.choice(UserType.values());
     private final Map<String, TextField> detailFields = new LinkedHashMap<>();
@@ -31,14 +31,15 @@ public class UserView extends CrudView<User> {
         roleBox.setValue(DEFAULT_TYPE);
 
         table.getColumns().addAll(ViewUtil.<User>idCol(), ViewUtil.<User>col("Username", "username"),
-                ViewUtil.<User>col("Email", "email"), ViewUtil.<User>col("Role", "role", ViewUtil::pretty),
+                ViewUtil.<User>col("Email", "email"), ViewUtil.<User>col("Phone", "phone"),
+                ViewUtil.<User>col("Role", "role", ViewUtil::pretty),
                 ViewUtil.<User>col("Details", "details", UserView::describeDetails),
                 ViewUtil.<User>col("Can open", "features", UserView::describeFeatures));
 
         passwordF.setPromptText("blank = keep current");
 
         List<Node> fields = new ArrayList<>(List.of(ViewUtil.field("Username", usernameF), ViewUtil.field("Email", emailF),
-                ViewUtil.field("Password", passwordF), ViewUtil.field("Role", roleBox)));
+                ViewUtil.field("Phone", phoneF), ViewUtil.field("Password", passwordF), ViewUtil.field("Role", roleBox)));
         for (String column : UserType.allFields()) {
             TextField input = new TextField();
             VBox box = ViewUtil.field(ViewUtil.pretty(column), input);
@@ -61,6 +62,7 @@ public class UserView extends CrudView<User> {
     protected void fill(User v) {
         usernameF.setText(v.getUsername());
         emailF.setText(v.getEmail());
+        phoneF.setText(v.getPhone());
         roleBox.setValue(v.getType());
         detailFields.forEach((column, input) -> input.setText(v.getDetails().getOrDefault(column, "")));
     }
@@ -69,6 +71,7 @@ public class UserView extends CrudView<User> {
     protected void clearForm() {
         usernameF.clear();
         emailF.clear();
+        phoneF.clear();
         passwordF.clear();
         detailFields.values().forEach(TextField::clear);
         roleBox.setValue(DEFAULT_TYPE);
@@ -76,12 +79,12 @@ public class UserView extends CrudView<User> {
 
     @Override
     protected void add() {
-        controller.add(usernameF.getText(), emailF.getText(), roleBox.getValue(), passwordF.getText(), details());
+        controller.add(usernameF.getText(), emailF.getText(), phoneF.getText(), roleBox.getValue(), passwordF.getText(), details());
     }
 
     @Override
     protected void update(User v) {
-        controller.update(v.getId(), usernameF.getText(), emailF.getText(), roleBox.getValue(), passwordF.getText(), details());
+        controller.update(v.getId(), usernameF.getText(), emailF.getText(), phoneF.getText(), roleBox.getValue(), passwordF.getText(), details());
     }
 
     @Override

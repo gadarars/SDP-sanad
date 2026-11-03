@@ -35,7 +35,7 @@ public class LoginController {
         String hash = PasswordHasher.hash("admin123");
         UserFactory factory = UserType.ADMIN.getFactory();   // FACTORY METHOD
         repo.findByUsername("admin").ifPresentOrElse(
-                existing -> repo.update(factory.buildUser(existing.getId(), "admin", existing.getEmail(), Map.of()), hash),
-                () -> repo.add(factory.buildUser(0, "admin", "admin@sanad.org", Map.of()), hash));
+                existing -> repo.update(factory.buildUser(existing.getId(), "admin", existing.getEmail(), existing.getPhone(), Map.of()), hash),
+                () -> repo.add(factory.buildUser(0, "admin", "admin@sanad.org", null, Map.of()), hash));
     }
 }

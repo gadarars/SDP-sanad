@@ -7,15 +7,9 @@ import java.util.Set;
  * MODEL: a DONOR user. Created only through UserFactory.
  */
 public class DonorUser extends User {
-    private final String phone;
 
     DonorUser(int id, String username, String email, String phone) {
-        super(id, username, email);
-        this.phone = phone;
-    }
-
-    public String getPhone() {
-        return phone;
+        super(id, username, email, phone);
     }
 
     @Override
@@ -30,6 +24,6 @@ public class DonorUser extends User {
 
     @Override
     public Map<String, String> getDetails() {
-        return Map.of("phone", phone);
+        return Map.of();
     }
 }

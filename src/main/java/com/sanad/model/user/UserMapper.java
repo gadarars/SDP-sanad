@@ -18,6 +18,6 @@ public class UserMapper implements RowMapper<User> {
         Map<String, String> details = new HashMap<>();
         for (String column : UserType.allFields()) details.put(column, rs.getString(column));
         UserFactory factory = UserType.valueOf(rs.getString("role")).getFactory();
-        return factory.buildUser(rs.getInt("id"), rs.getString("username"), rs.getString("email"), details);
+        return factory.buildUser(rs.getInt("id"), rs.getString("username"), rs.getString("email"), rs.getString("phone"), details);
     }
 }

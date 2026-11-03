@@ -9,7 +9,7 @@ import java.util.List;
 public enum UserType {
     ADMIN(new AdminFactory(), "job_title"),
     STAFF(new StaffFactory(), "job_title"),
-    DONOR(new DonorFactory(), "phone"),
+    DONOR(new DonorFactory()),
     VOLUNTEER(new VolunteerFactory(), "skills"),
     BENEFICIARY(new BeneficiaryFactory(), "address");
 
